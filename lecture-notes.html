@@ -412,7 +412,7 @@
 
   .voice-panel {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: center;
     gap: 8px;
     width: 100%;
@@ -422,10 +422,7 @@
   }
 
   .voice-panel-group {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    min-width: 0;
+    display: contents;
   }
 
   .voice-panel-group-right {
@@ -433,6 +430,7 @@
   }
 
   .voice-panel .btn {
+    width: 100%;
     height: 38px;
     min-height: 38px;
   }
@@ -717,6 +715,21 @@
     font-weight: 850;
     line-height: 1;
     text-align: center;
+    transition: color 180ms ease, text-shadow 180ms ease;
+  }
+
+  .trainer-note.warning-13 {
+    color: #c85a63;
+  }
+
+  .trainer-note.warning-14 {
+    color: #dc3545;
+    text-shadow: 0 0 8px rgba(220, 53, 69, .14);
+  }
+
+  .trainer-note.warning-15 {
+    color: #b91c1c;
+    text-shadow: 0 0 12px rgba(185, 28, 28, .28);
   }
 
   .trainer-prompt,
@@ -1576,6 +1589,14 @@
   }
 
 </style>
+
+<style id="midi-mic-adjustments">
+  /* Pas de point rouge MIDI : le voyant n'apparaît que lorsqu'il devient actif. */
+  #midiDot { display:none; }
+  #midiDot.active, #midiDot.connected, #midiDot.on {
+    display:block;
+  }
+</style>
 </head>
 <body>
   <main class="wrap">
@@ -1765,12 +1786,12 @@
       <div class="voice-panel" id="voicePanel" hidden>
         <div class="voice-panel-group voice-panel-group-left">
           <div class="voice-activity inactive" id="voiceActivity" role="status" aria-live="polite">Micro désactivé</div>
-          <button class="btn" id="voiceTrainerOpen" type="button">Apprentissage</button>
         </div>
         <div class="voice-panel-group voice-panel-group-right">
           <label class="voice-profile-local" for="voiceProfileQuickSelect" id="voiceProfileLabel">Profil local</label>
           <select class="voice-profile-select" id="voiceProfileQuickSelect" aria-labelledby="voiceProfileLabel"></select>
         </div>
+        <button class="btn" id="voiceTrainerOpen" type="button">Apprentissage</button>
         <div class="sr-only" aria-live="polite">
           <span id="voiceStatus">Micro inactif</span>
           <span id="voiceState"><span id="voiceDot"></span><span id="voiceLevelBar"></span></span>
@@ -2669,6 +2690,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     voiceAudioSource: null,
     voiceMeydaAnalyzer: null,
     voiceVad: null,
+    voiceSensitivity: 1.0,
     voiceAcousticActive: false,
     voiceShouldListen: false,
     voiceStarting: false,
@@ -2945,11 +2967,10 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
           true
         );
       } else {
-        showMidiWarning(
-          "<b>Impossible d'accéder au MIDI.</b><br>" +
-          "Vérifiez que le piano est connecté et que l'autorisation MIDI est accordée au navigateur.",
-          true
-        );
+        // Sur PC, l'absence de clavier MIDI est un état normal :
+        // aucun message, aucun bouton Réessayer, aucun voyant rouge.
+        hideMidiWarning();
+        midiStatusEl.style.display = "none";
       }
     }
   }
@@ -2970,6 +2991,13 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       return name !== "session 1";
     });
     const hasAny = inputs.length > 0;
+
+    if (!hasAny && !isAppleMobileDevice()) {
+      midiDevicesEl.innerHTML = "";
+      midiStatusEl.style.display = "none";
+      hideMidiWarning();
+      return;
+    }
 
     if (!hasAny) {
       midiLabelEl.textContent = t("midiNoDevice");
@@ -3509,8 +3537,10 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
 
   function resetVoiceVad() {
     state.voiceVad = {
-      noiseFloor: 0.006,
+      noiseFloor: 0.001,
       calibrationFrames: 0,
+      calibrationValues: [],
+      calibrationDone: false,
       speaking: false,
       hotFrames: 0,
       quietFrames: 0,
@@ -3542,7 +3572,14 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     vad.preRoll = [];
     vad.cooldownUntil = performance.now() + 260;
 
-    if (!vector || duration < 0.08) {
+    const sensitivityPercent = 100 / Math.max(state.voiceSensitivity || 1.0, 0.0001);
+    const minDuration =
+      sensitivityPercent <= 15 ? 0.34 :
+      sensitivityPercent <= 30 ? 0.28 :
+      sensitivityPercent <= 60 ? 0.20 :
+      sensitivityPercent <= 100 ? 0.14 : 0.10;
+
+    if (!vector || duration < minDuration) {
       notifyAcousticTooShort();
       return;
     }
@@ -3557,23 +3594,78 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
 
     const vad = state.voiceVad;
     const now = performance.now();
-    if (vad.calibrationFrames < 12) {
-      vad.noiseFloor = vad.noiseFloor * 0.72 + frame.rms * 0.28;
+
+    // Calibration du silence au démarrage : ~1 seconde de mesures.
+    // On utilise un percentile élevé plutôt qu'une simple moyenne pour
+    // tenir compte du bruit réel de la pièce sans être trompé par un pic isolé.
+    if (!vad.calibrationDone) {
+      vad.calibrationValues.push(frame.rms);
       vad.calibrationFrames++;
+
+      if (vad.calibrationFrames < 90) {
+        return;
+      }
+
+      const sorted = vad.calibrationValues.slice().sort((a, b) => a - b);
+      const index = Math.min(sorted.length - 1, Math.floor(sorted.length * 0.85));
+      vad.noiseFloor = Math.max(0.00015, sorted[index] || 0.00015);
+      vad.calibrationDone = true;
+      vad.calibrationValues = [];
+      vad.cooldownUntil = now + 200;
       return;
     }
 
-    const threshold = Math.max(0.008, vad.noiseFloor * 2.8);
+    // Le curseur règle maintenant la marge AU-DESSUS du bruit ambiant.
+    // 100 % = marge normale ; 10 % = très stricte ; 200 % = très sensible.
+    const sensitivityPercent = 100 / Math.max(state.voiceSensitivity || 1.0, 0.0001);
+
+    const ratio =
+      sensitivityPercent <= 15 ? 6.0 :
+      sensitivityPercent <= 30 ? 4.5 :
+      sensitivityPercent <= 60 ? 3.2 :
+      sensitivityPercent <= 100 ? 2.4 :
+      sensitivityPercent <= 150 ? 1.9 : 1.6;
+
+    const absoluteMargin =
+      sensitivityPercent <= 15 ? 0.020 :
+      sensitivityPercent <= 30 ? 0.012 :
+      sensitivityPercent <= 60 ? 0.007 :
+      sensitivityPercent <= 100 ? 0.004 :
+      sensitivityPercent <= 150 ? 0.0025 : 0.0015;
+
+    const threshold = Math.max(
+      vad.noiseFloor * ratio,
+      vad.noiseFloor + absoluteMargin
+    );
+
     const hasVoice = frame.rms >= threshold;
 
     if (!vad.speaking) {
-      if (!hasVoice) vad.noiseFloor = vad.noiseFloor * 0.985 + frame.rms * 0.015;
+      if (!hasVoice) {
+        // Le bruit de fond peut monter lentement (ventilateur, pièce, etc.).
+        // On le suit sans faire baisser trop vite le seuil vers le silence.
+        if (frame.rms > vad.noiseFloor) {
+          vad.noiseFloor = vad.noiseFloor * 0.94 + frame.rms * 0.06;
+        } else {
+          vad.noiseFloor = vad.noiseFloor * 0.997 + frame.rms * 0.003;
+        }
+      }
       vad.preRoll.push(frame);
       if (vad.preRoll.length > 4) vad.preRoll.shift();
       if (now < vad.cooldownUntil) return;
 
       vad.hotFrames = hasVoice ? vad.hotFrames + 1 : 0;
-      if (vad.hotFrames >= 2) {
+
+      // Plus la sensibilité est basse, plus on exige de trames consécutives
+      // avant de considérer qu'une vraie parole a commencé.
+      const sensitivityPercent = 100 / Math.max(state.voiceSensitivity || 1.0, 0.0001);
+      const requiredHotFrames =
+        sensitivityPercent <= 15 ? 8 :
+        sensitivityPercent <= 30 ? 6 :
+        sensitivityPercent <= 60 ? 4 :
+        sensitivityPercent <= 100 ? 3 : 2;
+
+      if (vad.hotFrames >= requiredHotFrames) {
         vad.speaking = true;
         vad.frames = vad.preRoll.slice();
         vad.quietFrames = 0;
@@ -4179,6 +4271,15 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     );
     const totalRequired = VOICE_SAMPLE_COUNT * training.targetNoteIndices.length;
     trainerNoteEl.textContent = noteName;
+    trainerNoteEl.classList.remove("warning-13", "warning-14", "warning-15");
+    if (currentSamples.length >= 15) {
+      trainerNoteEl.classList.add("warning-15");
+    } else if (currentSamples.length >= 14) {
+      trainerNoteEl.classList.add("warning-14");
+    } else if (currentSamples.length >= 13) {
+      trainerNoteEl.classList.add("warning-13");
+    }
+
     trainerPromptEl.textContent = t("voiceTrainingPrompt")
       .replace("{note}", noteName);
     trainerProgressEl.max = totalRequired;
@@ -4381,20 +4482,34 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
         return;
       }
 
-      training.targetPosition++;
-      training.noteIndex = training.targetNoteIndices[training.targetPosition];
+      // La 15e écoute reste brièvement affichée en rouge vif pour prévenir
+      // que l'on va passer à la note suivante.
       training.accepting = false;
-      training.lastDuration = 0;
-      training.transition = t("voiceTrainingNext")
-        .replace("{note}", NAMES[state.lang][training.noteIndex]);
+      renderVoiceTraining();
+
       window.clearTimeout(training.transitionTimer);
       training.transitionTimer = window.setTimeout(() => {
         if (state.voiceTraining !== training) return;
-        training.accepting = true;
-        training.transition = "";
+
+        training.targetPosition++;
+        training.noteIndex = training.targetNoteIndices[training.targetPosition];
+        training.lastDuration = 0;
+        training.transition = t("voiceTrainingNext")
+          .replace("{note}", NAMES[state.lang][training.noteIndex]);
         renderVoiceTraining();
-      }, 850);
+
+        window.clearTimeout(training.transitionTimer);
+        training.transitionTimer = window.setTimeout(() => {
+          if (state.voiceTraining !== training) return;
+          training.accepting = true;
+          training.transition = "";
+          renderVoiceTraining();
+        }, 850);
+      }, 380);
+
+      return;
     }
+
     renderVoiceTraining();
   }
 
@@ -7562,5 +7677,6 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   restoreLastMidiFile();
 })();
 </script>
+
 </body>
 </html>
