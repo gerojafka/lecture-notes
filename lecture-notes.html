@@ -1585,14 +1585,12 @@
     <section class="card">
       <div class="midi-warning" id="midiWarning">
         <div id="midiWarningText"></div>
-        <button type="button" id="midiEnableBtn" style="margin-top:8px;display:none;">Activer le piano MIDI</button>
         <button type="button" id="midiRetryBtn" style="margin-top:8px;display:none;">Réessayer le MIDI</button>
-        <div id="midiDebug" style="margin-top:8px;font-size:12px;line-height:1.35;"></div>
       </div>
 
       <div class="midi-status" id="midiStatus" style="display:none;">
-        <div class="midi-dot" id="midiDot"></div>
-        <span id="midiLabel">MIDI</span>
+        <div class="midi-dot" id="midiDot" title="Activité MIDI"></div>
+        <span id="midiLabel" style="display:none;" aria-hidden="true">MIDI</span>
         <div class="midi-devices" id="midiDevices"></div>
       </div>
 
@@ -2742,9 +2740,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   const midiDevicesEl = document.getElementById("midiDevices");
   const midiWarningEl = document.getElementById("midiWarning");
   const midiWarningTextEl = document.getElementById("midiWarningText");
-  const midiEnableBtn = document.getElementById("midiEnableBtn");
   const midiRetryBtn = document.getElementById("midiRetryBtn");
-  const midiDebugEl = document.getElementById("midiDebug");
   const NS = "http://www.w3.org/2000/svg";
 
   function el(tag, attrs) {
@@ -2879,17 +2875,15 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     return /iPad|iPhone|iPod/i.test(ua) || touchMac;
   }
 
-  function showMidiWarning(message, showRetry = false, showEnable = false) {
+  function showMidiWarning(message, showRetry = false) {
     if (!midiWarningEl) return;
     if (midiWarningTextEl) midiWarningTextEl.innerHTML = message;
     midiWarningEl.style.display = "block";
-    if (midiEnableBtn) midiEnableBtn.style.display = showEnable ? "inline-block" : "none";
     if (midiRetryBtn) midiRetryBtn.style.display = showRetry ? "inline-block" : "none";
   }
 
   function hideMidiWarning() {
     if (midiWarningEl) midiWarningEl.style.display = "none";
-    if (midiEnableBtn) midiEnableBtn.style.display = "none";
     if (midiRetryBtn) midiRetryBtn.style.display = "none";
   }
 
@@ -2904,7 +2898,8 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       if (appleMobile) {
         showMidiWarning(
           "<b>MIDI non disponible dans Safari sur iPad/iPhone.</b><br>" +
-          "Pour utiliser votre piano MIDI, ouvrez cette même page dans <b>MIDIWeb Browser</b> ou <b>Web MIDI Browser</b>."
+          "Pour utiliser votre piano MIDI, ouvrez cette même page dans <b>Web MIDI Browser</b>. " +
+          "Le microphone et les autres fonctions restent utilisables dans Safari."
         );
       } else {
         showMidiWarning(
@@ -2915,72 +2910,9 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       return;
     }
 
-    midiStatusEl.style.display = "flex";
-
-    if (appleMobile) {
-      showMidiWarning(
-        "<b>Piano MIDI prêt à être activé.</b><br>" +
-        "Touchez le bouton ci-dessous pour autoriser l'accès à votre piano.",
-        false,
-        true
-      );
-      return;
-    }
-
     hideMidiWarning();
+    midiStatusEl.style.display = "flex";
     refreshMidi();
-  }
-
-  function setMidiDebug(message) {
-    if (midiDebugEl) midiDebugEl.textContent = String(message || "");
-  }
-
-  function getMidiInputsCompat(access) {
-    const inputs = [];
-    if (!access || !access.inputs) return inputs;
-    const collection = access.inputs;
-
-    // Anciennes implémentations iOS : forEach() est souvent le plus fiable.
-    if (typeof collection.forEach === "function") {
-      try {
-        collection.forEach((input) => {
-          if (input && !inputs.includes(input)) inputs.push(input);
-        });
-      } catch (_) {}
-    }
-
-    // Implémentations Web MIDI modernes.
-    if (!inputs.length && typeof collection.values === "function") {
-      try {
-        const iterator = collection.values();
-        if (iterator && typeof iterator.next === "function") {
-          let item = iterator.next();
-          while (!item.done) {
-            if (item.value && !inputs.includes(item.value)) inputs.push(item.value);
-            item = iterator.next();
-          }
-        }
-      } catch (_) {}
-    }
-
-    // Iterable générique.
-    if (!inputs.length && typeof collection[Symbol.iterator] === "function") {
-      try {
-        for (const item of collection) {
-          const input = Array.isArray(item) ? item[1] : item;
-          if (input && !inputs.includes(input)) inputs.push(input);
-        }
-      } catch (_) {}
-    }
-
-    // Dernier secours pour certains polyfills.
-    if (!inputs.length && typeof collection.length === "number") {
-      for (let i = 0; i < collection.length; i++) {
-        if (collection[i]) inputs.push(collection[i]);
-      }
-    }
-
-    return inputs;
   }
 
   async function refreshMidi() {
@@ -2990,26 +2922,15 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     }
 
     try {
-      setMidiDebug("Demande d'accès MIDI…");
       state.midiAccess = await navigator.requestMIDIAccess({ sysex: false });
       hideMidiWarning();
       midiStatusEl.style.display = "flex";
-
-      const detectedInputs = getMidiInputsCompat(state.midiAccess);
-      setMidiDebug(
-        "Accès MIDI obtenu · " + detectedInputs.length +
-        " entrée(s)" +
-        (detectedInputs.length
-          ? " · " + detectedInputs.map((p) => p.name || "MIDI").join(", ")
-          : "")
-      );
 
       state.midiAccess.onstatechange = () => {
         setTimeout(() => renderMidiDevices(), 100);
       };
       renderMidiDevices();
     } catch (err) {
-      setMidiDebug("Erreur MIDI : " + (err && err.message ? err.message : String(err)));
       state.midiAccess = null;
       disconnectMidiInput();
       midiLabelEl.textContent = t("midiNoDevice");
@@ -3033,33 +2954,22 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     }
   }
 
-  if (midiEnableBtn) {
-    midiEnableBtn.addEventListener("click", async () => {
-      hideMidiWarning();
-      midiStatusEl.style.display = "flex";
-      await refreshMidi();
-    });
-  }
-
   if (midiRetryBtn) {
-    midiRetryBtn.addEventListener("click", async () => {
+    midiRetryBtn.addEventListener("click", () => {
       hideMidiWarning();
       midiStatusEl.style.display = navigator.requestMIDIAccess ? "flex" : "none";
-      await refreshMidi();
+      refreshMidi();
     });
   }
 
   function renderMidiDevices() {
     if (!state.midiAccess) return;
     midiDevicesEl.innerHTML = "";
-    const inputs = getMidiInputsCompat(state.midiAccess);
+    const inputs = Array.from(state.midiAccess.inputs.values()).filter((input) => {
+      const name = String(input && input.name || "").trim().toLowerCase();
+      return name !== "session 1";
+    });
     const hasAny = inputs.length > 0;
-
-    setMidiDebug(
-      "Accès MIDI actif · " + inputs.length +
-      " entrée(s)" +
-      (inputs.length ? " · " + inputs.map((p) => p.name || "MIDI").join(", ") : "")
-    );
 
     if (!hasAny) {
       midiLabelEl.textContent = t("midiNoDevice");
@@ -3092,18 +3002,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   function connectMidiInput(input) {
     disconnectMidiInput();
     state.midiInput = input;
-
-    try {
-      if (typeof input.open === "function") {
-        const opened = input.open();
-        if (opened && typeof opened.catch === "function") {
-          opened.catch(() => {});
-        }
-      }
-    } catch (_) {}
-
     input.onmidimessage = onMidiMessage;
-    setMidiDebug("Entrée MIDI connectée : " + (input.name || "MIDI") + " · en attente d'une touche…");
     updateMidiDot();
   }
 
@@ -3128,17 +3027,8 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   }
 
   function onMidiMessage(event) {
-    const data = event && event.data ? Array.from(event.data) : [];
-    const status = Number(data[0] || 0);
-    const note = Number(data[1] || 0);
-    const velocity = Number(data[2] || 0);
+    const [status, note, velocity] = event.data;
     const command = status & 0xf0;
-
-    setMidiDebug(
-      "MIDI reçu : status " + status +
-      " · note " + note +
-      " · vélocité " + velocity
-    );
 
     if (command === 0x90 && velocity > 0) {
       state.midiNotesOn.add(note);
@@ -3152,7 +3042,10 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
         handlePartitionInput(note);
       } else if (state.answerMode === "keyboard" && !state.locked && !isBatchComplete()) {
         const currentNote = state.batch[state.index];
-        if (currentNote && currentNote.midi === note) {
+        if (currentNote) {
+          // Toute touche du Casio constitue une réponse :
+          // correcte si elle correspond, fausse sinon.
+          // Une mauvaise note est donc comptée puis on passe à la suivante.
           submitAnswer({ type: "keyboard", midi: note });
         }
       }
