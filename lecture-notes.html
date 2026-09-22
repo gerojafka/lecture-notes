@@ -450,6 +450,10 @@
     line-height: 1.3;
   }
 
+  .voice-error.hint {
+    color: var(--muted);
+  }
+
   .voice-info {
     min-width: 0;
   }
@@ -3803,8 +3807,10 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
         : key);
     voiceStatusEl.textContent = t(statusKey)
       .replace("{name}", profile ? profile.name : "");
-    voiceErrorEl.hidden = !state.voiceStatusError;
-    voiceErrorEl.textContent = state.voiceStatusError ? voiceStatusEl.textContent : "";
+    const showHint = key === "voiceIpadNeedTraining" && !state.voiceStatusError;
+    voiceErrorEl.hidden = !state.voiceStatusError && !showHint;
+    voiceErrorEl.classList.toggle("hint", showHint);
+    voiceErrorEl.textContent = voiceErrorEl.hidden ? "" : voiceStatusEl.textContent;
     voiceStateEl.classList.toggle("error", state.voiceStatusError);
     voiceDotEl.classList.toggle("error", state.voiceStatusError);
     voiceDotEl.classList.toggle("listening",
@@ -3820,7 +3826,9 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   }
 
   function updateVoiceButton() {
-    const active = state.voiceShouldListen && !state.voiceStatusError;
+    const active = hasLiveVoiceStream()
+      || (state.voiceShouldListen && state.voiceStatusKey === "voiceListening"
+        && !state.voiceStatusError);
     voiceActivityEl.classList.toggle("active", active);
     voiceActivityEl.classList.toggle("inactive", !active);
     voiceActivityEl.textContent = t(active ? "voiceActive" : "voiceInactive");
@@ -3928,6 +3936,12 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     interruptVoiceTraining();
   }
 
+  function hasLiveVoiceStream() {
+    const stream = state.voiceStream;
+    return Boolean(stream && stream.active && stream.getAudioTracks
+      && stream.getAudioTracks().some((track) => track && track.readyState === "live"));
+  }
+
   function stopVoiceStream() {
     stopVoiceAcousticAnalyzer();
     const stream = state.voiceStream;
@@ -3938,12 +3952,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
 
   async function keepVoiceStreamOpen() {
     // Reuse only a genuinely active audio stream.
-    if (state.voiceStream && state.voiceStream.active) {
-        const activeAudioTracks = state.voiceStream.getAudioTracks
-            ? state.voiceStream.getAudioTracks().filter(track => track && track.readyState === 'live')
-            : [];
-        if (activeAudioTracks.length > 0) return state.voiceStream;
-    }
+    if (hasLiveVoiceStream()) return state.voiceStream;
 
     // The previous stream may exist but no longer be usable.
     if (state.voiceStream && typeof state.voiceStream.getTracks === 'function') {
@@ -3969,6 +3978,14 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
         }
 
         state.voiceStream = stream;
+        audioTracks.forEach((track) => {
+            track.addEventListener("ended", () => {
+                if (state.voiceStream !== stream) return;
+                stopVoiceRecognition({ keepStatus: true });
+                setVoiceStatus("voiceNoMic", true);
+                updateVoiceButton();
+            });
+        });
         return stream;
     } catch (error) {
         setVoiceMediaError(error);
@@ -4086,6 +4103,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       selectAvailableAcousticProfile();
     }
     const useAcoustic = shouldUseAcousticInput();
+    const captureOnly = isAppleTouchDevice() && !useAcoustic;
     if (useAcoustic && !canUseAcousticAnalysis()) {
       const captureAvailable = Boolean(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
       setVoiceStatus(!captureAvailable && !window.isSecureContext
@@ -4093,13 +4111,13 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       updateVoiceButton();
       return false;
     }
-    if (!useAcoustic && isAppleTouchDevice()) {
+    if (captureOnly && !canUseAcousticAnalysis()) {
       setVoiceStatus(canUseAcousticAnalysis() ? "voiceIpadNeedTraining"
         : (!window.isSecureContext ? "voiceIpadSecurePage" : "voiceAcousticUnavailable"), true);
       updateVoiceButton();
       return false;
     }
-    if (!useAcoustic && !getSpeechRecognitionCtor()) {
+    if (!useAcoustic && !captureOnly && !getSpeechRecognitionCtor()) {
       setVoiceStatus("voiceUnsupported", true);
       updateVoiceButton();
       return false;
@@ -4128,6 +4146,10 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       if (!state.voiceStarting || state.answerMode !== "voice") {
         stopVoiceStream();
         return false;
+      }
+      if (captureOnly) {
+        setVoiceStatus("voiceIpadNeedTraining", false);
+        return hasLiveVoiceStream();
       }
       state.voiceShouldListen = true;
       if (useAcoustic) {
@@ -4345,13 +4367,12 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     if (!state.voiceShouldListen && !state.voiceStarting) {
       if (isAppleTouchDevice() && !profileHasAcousticData(active)) {
         setTrainerMessage(t("voiceIpadNeedTraining"), false);
-      } else {
-        requestVoiceStart().then((started) => {
-          if (!started && voiceTrainerEl.open && state.voiceStatusError) {
-            setTrainerMessage(voiceStatusEl.textContent, true);
-          }
-        });
       }
+      requestVoiceStart().then((started) => {
+        if (!started && voiceTrainerEl.open && state.voiceStatusError) {
+          setTrainerMessage(voiceStatusEl.textContent, true);
+        }
+      });
     }
   }
 
