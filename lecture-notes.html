@@ -442,6 +442,14 @@
     min-height: 38px;
   }
 
+  .voice-error {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--bad);
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
   .voice-info {
     min-width: 0;
   }
@@ -1799,6 +1807,7 @@
           <select class="voice-profile-select" id="voiceProfileQuickSelect" aria-labelledby="voiceProfileLabel"></select>
         </div>
         <button class="btn" id="voiceTrainerOpen" type="button">Apprentissage</button>
+        <p class="voice-error" id="voiceError" role="alert" hidden></p>
         <div class="sr-only" aria-live="polite">
           <span id="voiceStatus">Micro inactif</span>
           <span id="voiceState"><span id="voiceDot"></span><span id="voiceLevelBar"></span></span>
@@ -2407,7 +2416,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       voiceAcousticListening: "Analyse audio active... parlez normalement.",
       voiceAcousticListeningProfile: "Analyse audio du profil de {name}...",
       voiceAcousticUnavailable: "Analyse audio indisponible dans ce navigateur. Vérifiez l'accès au micro dans MIDIWeb.",
-      voiceIpadNeedTraining: "Sur iPad, créez d'abord votre profil audio avec « Apprentissage ».",
+      voiceIpadNeedTraining: "Aucun profil audio utilisable sur ce site. Dans « Apprentissage », importez votre profil JSON ou créez-en un.",
       voiceIpadSecurePage: "Micro indisponible : ouvrez la page en HTTPS et autorisez le micro dans MIDIWeb.",
       voiceAcousticDetected: "Voix détectée...",
       voiceAcousticTooShort: "Son trop court. Recommencez.",
@@ -2415,7 +2424,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       voiceAcousticResult: "Analyse audio : {note} · confiance {confidence} %",
       voiceUnsupported: "Reconnaissance vocale indisponible dans ce navigateur.",
       voicePermissionDenied: "Micro refusé. Autorisez-le dans les réglages de MIDIWeb ou du navigateur.",
-      voiceServiceBlocked: "Le service de reconnaissance vocale est bloqué par ce navigateur.",
+      voiceServiceBlocked: "Le service vocal du navigateur est bloqué. Utilisez un profil audio dans « Apprentissage ».",
       voiceLanguageUnsupported: "La reconnaissance vocale en français n'est pas disponible.",
       voiceNoMic: "Aucun micro disponible.",
       voiceNetwork: "Reconnaissance vocale indisponible. Vérifiez la connexion Internet.",
@@ -2595,7 +2604,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       voiceAcousticListening: "Audio analysis active... speak normally.",
       voiceAcousticListeningProfile: "Analyzing audio for {name}'s profile...",
       voiceAcousticUnavailable: "Audio analysis is unavailable in this browser. Check microphone access in MIDIWeb.",
-      voiceIpadNeedTraining: "On iPad, first create your audio profile with Training.",
+      voiceIpadNeedTraining: "No usable audio profile on this site. In Training, import your JSON profile or create one.",
       voiceIpadSecurePage: "Microphone unavailable: open the page over HTTPS and allow microphone access in MIDIWeb.",
       voiceAcousticDetected: "Voice detected...",
       voiceAcousticTooShort: "Sound too short. Try again.",
@@ -2603,7 +2612,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       voiceAcousticResult: "Audio analysis: {note} · confidence {confidence}%",
       voiceUnsupported: "Speech recognition is unavailable in this browser.",
       voicePermissionDenied: "Microphone blocked. Allow it in MIDIWeb or browser settings.",
-      voiceServiceBlocked: "The speech recognition service is blocked by this browser.",
+      voiceServiceBlocked: "The browser's speech service is blocked. Use an audio profile in Training.",
       voiceLanguageUnsupported: "Speech recognition is unavailable for this language.",
       voiceNoMic: "No microphone is available.",
       voiceNetwork: "Speech recognition is unavailable. Check the Internet connection.",
@@ -2721,6 +2730,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   const voiceLevelBarEl = document.getElementById("voiceLevelBar");
   const voiceProfileLabelEl = document.getElementById("voiceProfileLabel");
   const voiceActivityEl = document.getElementById("voiceActivity");
+  const voiceErrorEl = document.getElementById("voiceError");
   const voiceProfileQuickSelectEl = document.getElementById("voiceProfileQuickSelect");
   const voiceTrainerOpenEl = document.getElementById("voiceTrainerOpen");
   const voiceTrainerEl = document.getElementById("voiceTrainer");
@@ -3793,6 +3803,8 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
         : key);
     voiceStatusEl.textContent = t(statusKey)
       .replace("{name}", profile ? profile.name : "");
+    voiceErrorEl.hidden = !state.voiceStatusError;
+    voiceErrorEl.textContent = state.voiceStatusError ? voiceStatusEl.textContent : "";
     voiceStateEl.classList.toggle("error", state.voiceStatusError);
     voiceDotEl.classList.toggle("error", state.voiceStatusError);
     voiceDotEl.classList.toggle("listening",
@@ -3804,6 +3816,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     const details = error && error.message ? ": " + error.message : "";
     setVoiceStatus("voiceError", true);
     voiceStatusEl.textContent += " (" + code + details + ")";
+    voiceErrorEl.textContent = voiceStatusEl.textContent;
   }
 
   function updateVoiceButton() {
@@ -3897,7 +3910,6 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
 
     state.voiceShouldListen = false;
     stopVoiceStream();
-    updateVoiceButton();
 
     if (error === "not-allowed") {
       setVoiceStatus("voicePermissionDenied", true);
@@ -3912,6 +3924,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     } else {
       setVoiceTechnicalError(event);
     }
+    updateVoiceButton();
     interruptVoiceTraining();
   }
 
@@ -4080,9 +4093,14 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       updateVoiceButton();
       return false;
     }
+    if (!useAcoustic && isAppleTouchDevice()) {
+      setVoiceStatus(canUseAcousticAnalysis() ? "voiceIpadNeedTraining"
+        : (!window.isSecureContext ? "voiceIpadSecurePage" : "voiceAcousticUnavailable"), true);
+      updateVoiceButton();
+      return false;
+    }
     if (!useAcoustic && !getSpeechRecognitionCtor()) {
-      setVoiceStatus(isAppleTouchDevice() && canUseAcousticAnalysis()
-        ? "voiceIpadNeedTraining" : "voiceUnsupported", true);
+      setVoiceStatus("voiceUnsupported", true);
       updateVoiceButton();
       return false;
     }
@@ -4324,7 +4342,17 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     } else {
       voiceTrainerEl.setAttribute("open", "");
     }
-    if (!state.voiceShouldListen && !state.voiceStarting) requestVoiceStart();
+    if (!state.voiceShouldListen && !state.voiceStarting) {
+      if (isAppleTouchDevice() && !profileHasAcousticData(active)) {
+        setTrainerMessage(t("voiceIpadNeedTraining"), false);
+      } else {
+        requestVoiceStart().then((started) => {
+          if (!started && voiceTrainerEl.open && state.voiceStatusError) {
+            setTrainerMessage(voiceStatusEl.textContent, true);
+          }
+        });
+      }
+    }
   }
 
   function closeVoiceTrainer() {
@@ -4595,7 +4623,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       setTrainerMessage(saved
         ? t("voiceProfilesImported").replace("{count}", profiles.length)
         : t("voiceStorageError"), !saved);
-      if (resumeVoice) requestVoiceStart();
+      if (state.appMode === "exercise" && state.answerMode === "voice") requestVoiceStart();
     } catch (error) {
       setTrainerMessage(t("voiceProfileImportError"), true);
     }
@@ -4608,7 +4636,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     activateVoiceProfile(profileId);
     const profile = activeVoiceProfile();
     if (profile) voiceProfileNameEl.value = profile.name;
-    if (resumeVoice) requestVoiceStart();
+    if (state.appMode === "exercise" && state.answerMode === "voice") requestVoiceStart();
   }
 
   function loadSelectedVoiceProfile() {
@@ -4619,7 +4647,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     activateVoiceProfile(profile.id);
     voiceProfileNameEl.value = profile.name;
     setTrainerMessage(t("voiceProfileLoaded").replace("{name}", profile.name), false);
-    if (resumeVoice) requestVoiceStart();
+    if (state.appMode === "exercise" && state.answerMode === "voice") requestVoiceStart();
   }
 
   function deleteSelectedVoiceProfile() {
@@ -7683,7 +7711,10 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   trainerDiscardEl.addEventListener("click", () => cancelVoiceTraining());
   voiceProfileLoadEl.addEventListener("click", loadSelectedVoiceProfile);
   voiceProfileExportEl.addEventListener("click", exportAllVoiceProfiles);
-  voiceProfileImportButtonEl.addEventListener("click", () => voiceProfileImportEl.click());
+  voiceProfileImportButtonEl.addEventListener("click", () => {
+    if (state.answerMode === "voice") unlockVoiceAudioContext().catch(() => {});
+    voiceProfileImportEl.click();
+  });
   voiceProfileImportEl.addEventListener("change", importVoiceProfile);
   voiceProfileDeleteEl.addEventListener("click", deleteSelectedVoiceProfile);
   voiceProfileQuickSelectEl.addEventListener("change", selectQuickVoiceProfile);
