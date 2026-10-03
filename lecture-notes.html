@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Apprendre à lire les notes</title>
+<script>try{document.documentElement.dataset.theme=localStorage.getItem("lecture-notes-theme")==="night"?"night":"day"}catch(error){document.documentElement.dataset.theme="day"}</script>
 <style>
   :root {
     --bg: #f4f7fb;
@@ -58,39 +59,6 @@
 
   :fullscreen h1,
   :-webkit-full-screen h1 {
-    padding-top: 2px;
-    line-height: 1.2;
-  }
-
-  html.app-expanded,
-  html.app-expanded body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
-
-  html.app-expanded body {
-    padding: 0;
-    background: var(--panel);
-  }
-
-  html.app-expanded .wrap {
-    width: 100%;
-    height: 100%;
-    max-width: none;
-  }
-
-  html.app-expanded .card {
-    width: 100%;
-    height: 100%;
-    padding: 8px clamp(7px, 1vw, 12px);
-    overflow: auto;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-  }
-
-  html.app-expanded h1 {
     padding-top: 2px;
     line-height: 1.2;
   }
@@ -313,35 +281,39 @@
   .feedback.midi { color: var(--midi); }
 
   .midi-status {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 6px;
-    flex-wrap: wrap;
-  }
-
-  .midi-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
+    justify-content: center;
+    min-width: 42px;
+    height: 34px;
+    padding: 0 9px;
+    border: 1px solid #9f312c;
+    border-radius: 7px;
+    color: #ffffff;
     background: var(--bad);
-    transition: background .3s;
-    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 900;
+    line-height: 1;
+    box-shadow: 0 2px 5px rgba(194, 65, 59, .2);
+    transition: background .2s, border-color .2s, transform .16s;
   }
 
-  .midi-dot.connected { background: var(--good); }
-  .midi-dot.active { background: var(--midi); animation: pulse .4s ease; }
+  .midi-status.connected {
+    color: #ffffff;
+    border-color: #116b35;
+    background: var(--good);
+    box-shadow: 0 2px 5px rgba(21, 128, 61, .2);
+  }
+  .midi-status.active { animation: midi-text-pulse .35s ease; }
 
-  @keyframes pulse {
+  @keyframes midi-text-pulse {
     0% { transform: scale(1); }
-    50% { transform: scale(1.6); }
+    50% { transform: scale(1.12); }
     100% { transform: scale(1); }
   }
 
   .midi-devices {
-    display: flex;
+    display: none;
     gap: 6px;
     flex-wrap: wrap;
   }
@@ -412,7 +384,7 @@
 
   .voice-panel {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: center;
     gap: 8px;
     width: 100%;
@@ -422,7 +394,10 @@
   }
 
   .voice-panel-group {
-    display: contents;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    min-width: 0;
   }
 
   .voice-panel-group-right {
@@ -430,7 +405,6 @@
   }
 
   .voice-panel .btn {
-    width: 100%;
     height: 38px;
     min-height: 38px;
   }
@@ -715,21 +689,6 @@
     font-weight: 850;
     line-height: 1;
     text-align: center;
-    transition: color 180ms ease, text-shadow 180ms ease;
-  }
-
-  .trainer-note.warning-13 {
-    color: #c85a63;
-  }
-
-  .trainer-note.warning-14 {
-    color: #dc3545;
-    text-shadow: 0 0 8px rgba(220, 53, 69, .14);
-  }
-
-  .trainer-note.warning-15 {
-    color: #b91c1c;
-    text-shadow: 0 0 12px rgba(185, 28, 28, .28);
   }
 
   .trainer-prompt,
@@ -972,23 +931,123 @@
     .bar { margin-top: 6px; }
   }
 
-  /* Mode switch bar */
-  .mode-switch-bar {
+  .app-home {
+    display: grid;
+    place-items: center;
+    min-height: min(56vh, 470px);
+    overflow: hidden;
+    padding: clamp(22px, 5vw, 54px);
+    background: #f7f9fc;
+  }
+
+  .app-home-inner {
+    width: min(860px, 100%);
+  }
+
+  .app-home-title {
+    margin: 0 0 24px;
+    color: var(--ink);
+    font-size: 20px;
+    font-weight: 850;
+    text-align: center;
+  }
+
+  .app-home-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .app-choice {
+    --choice-accent: #35d1b2;
+    position: relative;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 8px;
+    min-height: 178px;
+    overflow: hidden;
+    align-items: flex-end;
+    gap: 16px;
+    padding: 22px 24px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    color: #ffffff;
+    background: #123238;
+    box-shadow: 0 9px 24px rgba(20, 34, 51, .17);
+    cursor: pointer;
+    text-align: left;
+    isolation: isolate;
+    transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
   }
-  .mode-switch-bar > .seg {
-    max-width: 440px;
-    width: 100%;
+
+  .app-choice:nth-child(2) {
+    --choice-accent: #ff7a8b;
+    background: #3a2029;
   }
-  .mode-switch-bar button {
-    font-size: 13px;
-    font-weight: 800;
-    padding: 7px 12px;
+
+  .app-choice::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 25px 0 46px;
+    opacity: .22;
+    background: repeating-linear-gradient(to bottom, transparent 0 12px, #ffffff 13px 14px);
+  }
+
+  .app-choice::after {
+    content: "♪";
+    position: absolute;
+    z-index: -1;
+    top: 35px;
+    left: -34px;
+    color: var(--choice-accent);
+    font: 700 42px/1 Georgia, serif;
+    opacity: .82;
+    animation: menu-note-travel 6s linear infinite;
+  }
+
+  .app-choice:nth-child(2)::after {
+    content: "♫";
+    animation-delay: -3s;
+  }
+
+  .app-choice:hover {
+    transform: translateY(-4px) scale(1.012);
+    border-color: var(--choice-accent);
+    box-shadow: 0 15px 30px rgba(20, 34, 51, .23);
+  }
+
+  .app-choice:active { transform: translateY(0); }
+
+  .app-choice-icon {
+    display: grid;
+    width: 58px;
+    height: 58px;
+    flex: 0 0 58px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, .4);
+    border-radius: 50%;
+    color: var(--choice-accent);
+    background: rgba(0, 0, 0, .16);
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+    text-align: center;
+  }
+
+  .app-choice-label {
+    font-size: clamp(16px, 2vw, 21px);
+    font-weight: 850;
+  }
+
+  @keyframes menu-note-travel {
+    0% { transform: translateX(0) translateY(16px); opacity: 0; }
+    12% { opacity: .82; }
+    50% { transform: translateX(220px) translateY(-12px); }
+    88% { opacity: .82; }
+    100% { transform: translateX(470px) translateY(8px); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app-choice::after { animation: none; left: 72%; }
   }
   .partition-language {
     display: flex;
@@ -1015,6 +1074,114 @@
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 10px 12px;
+  }
+
+  .partition-video-wrap {
+    position: relative;
+    display: grid;
+    width: min(100%, 760px);
+    max-height: 31vh;
+    margin: 0 auto 8px;
+    overflow: hidden;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: #111820;
+    box-shadow: 0 2px 8px rgba(20, 34, 51, .14);
+  }
+
+  .partition-video-wrap[hidden] {
+    display: none;
+  }
+
+  .partition-video {
+    display: block;
+    width: 100%;
+    max-height: 31vh;
+    object-fit: contain;
+    background: #000000;
+  }
+
+  .partition-video-back {
+    position: absolute;
+    z-index: 2;
+    top: 7px;
+    left: 7px;
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, .55);
+    background: rgba(20, 28, 36, .72);
+    backdrop-filter: blur(3px);
+  }
+
+  .partition-video-back:hover {
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, .85);
+    background: rgba(20, 28, 36, .9);
+  }
+
+  body.partition-video-mode h1 {
+    margin-bottom: 1px;
+    font-size: clamp(20px, 2.2vw, 28px);
+  }
+
+  body.partition-video-mode .subtitle,
+  body.partition-video-mode .partition-primary-row {
+    display: none;
+  }
+
+  body.partition-video-mode .partition-panel {
+    grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr);
+    gap: 6px 10px;
+    margin-bottom: 6px;
+    padding: 7px 9px;
+  }
+
+  body.partition-video-mode .partition-playback-row,
+  body.partition-video-mode .partition-loop-row {
+    min-width: 0;
+    flex-wrap: nowrap;
+  }
+
+  body.partition-video-mode .partition-playback-row > .partition-field {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  body.partition-video-mode .partition-playback-row > .partition-field:nth-child(2) {
+    flex: 1 1 210px;
+  }
+
+  body.partition-video-mode .partition-playback-row > .partition-field:nth-child(3) {
+    margin-left: 10px;
+  }
+
+  body.partition-video-mode .partition-playback-row .tempo-slider-wrap {
+    width: min(20vw, 220px);
+  }
+
+  body.partition-video-mode .partition-playback-row {
+    grid-column: 1;
+  }
+
+  body.partition-video-mode .partition-loop-row {
+    grid-column: 2;
+  }
+
+  body.partition-video-mode .partition-loop-row .partition-field {
+    min-width: 0;
+    flex-wrap: nowrap;
+  }
+
+  body.partition-video-mode .partition-loop-row #partitionLoopInfo {
+    display: none !important;
+  }
+
+  body.partition-video-mode .timeline-bar-wrap {
+    grid-column: 1 / -1;
+  }
+
+  body.partition-video-mode .stage {
+    margin-top: 4px;
   }
   .partition-row {
     display: flex;
@@ -1098,6 +1265,26 @@
     display: inline-block;
     font-size: 24px;
     line-height: 1;
+  }
+  .folder-open-icon {
+    display: inline-flex;
+    width: 26px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 26px;
+  }
+  .folder-open-icon svg {
+    width: 26px;
+    height: 22px;
+    overflow: visible;
+  }
+  .folder-open-icon .folder-back {
+    fill: currentColor;
+    opacity: .62;
+  }
+  .folder-open-icon .folder-front {
+    fill: currentColor;
   }
   .btn-sm.icon-only {
     width: 32px;
@@ -1421,20 +1608,6 @@
     outline-offset: 2px;
   }
 
-  .mode-switch-bar {
-    display: grid;
-    grid-template-columns: minmax(360px, 1fr) auto;
-    align-items: end;
-    justify-content: stretch;
-    gap: 8px;
-    margin-bottom: 6px;
-  }
-
-  .mode-switch-bar > .seg {
-    width: 100%;
-    max-width: none;
-  }
-
   .partition-language {
     align-items: end;
     gap: 7px;
@@ -1554,11 +1727,354 @@
     display: none;
   }
 
-  @media (max-width: 820px) {
-    .mode-switch-bar {
-      grid-template-columns: 1fr;
-      align-items: stretch;
+  .app-titlebar {
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr) 210px;
+    align-items: center;
+    min-height: 38px;
+    gap: 10px;
+  }
+
+  .app-titlebar h1 {
+    grid-column: 2;
+    position: relative;
+    display: inline-flex;
+    width: max-content;
+    align-items: center;
+    justify-self: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0 10px 5px;
+    color: #10243b;
+    font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+    font-size: 26px;
+    font-weight: 820;
+    line-height: 1;
+  }
+
+  .app-titlebar h1::before {
+    content: "♪";
+    color: #0f8f83;
+    font: 800 24px/1 Georgia, serif;
+  }
+
+  .app-titlebar h1::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 74px;
+    height: 3px;
+    border-radius: 2px;
+    background: #e45f73;
+    transform: translateX(-50%);
+  }
+
+  body:has(#appHome:not([hidden])) .app-titlebar {
+    min-height: 76px;
+  }
+
+  body:has(#appHome:not([hidden])) .app-titlebar h1 {
+    gap: 14px;
+    padding: 4px 18px 14px;
+    background: linear-gradient(105deg, #087f78 0 22%, #152d4f 43% 72%, #cf4e69 88% 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    font-family: "Palatino Linotype", "Book Antiqua", Georgia, serif;
+    font-size: clamp(36px, 4vw, 52px);
+    font-weight: 700;
+    line-height: 1.04;
+    letter-spacing: 0;
+    text-shadow: 0 8px 22px rgba(21, 45, 79, .10);
+    animation: home-title-arrival .65s cubic-bezier(.2, .75, .25, 1) both;
+  }
+
+  body:has(#appHome:not([hidden])) .app-titlebar h1::before {
+    content: "𝄞";
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    flex: 0 0 48px;
+    border: 1px solid rgba(8, 127, 120, .22);
+    border-radius: 50%;
+    background: #e6f6f3;
+    color: #087f78;
+    font: 400 39px/1 "Segoe UI Symbol", "Noto Music", serif;
+    text-shadow: none;
+    transform: rotate(-5deg);
+  }
+
+  body:has(#appHome:not([hidden])) .app-titlebar h1::after {
+    bottom: 4px;
+    width: min(270px, 64%);
+    height: 5px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #087f78 0 33%, #efb63f 33% 66%, #cf4e69 66% 100%);
+    box-shadow: 0 5px 14px rgba(207, 78, 105, .16);
+  }
+
+  @keyframes home-title-arrival {
+    from { opacity: 0; transform: translateY(-8px) scale(.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .btn-sm.icon-only.titlebar-back {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    width: 44px;
+    flex: 0 0 44px;
+    height: 36px;
+    font-size: 30px;
+    font-family: "Arial Black", "Segoe UI Symbol", sans-serif;
+    font-weight: 900;
+    line-height: 1;
+    -webkit-text-stroke: .65px currentColor;
+  }
+
+  @media (max-width: 700px) {
+    body:has(#appHome:not([hidden])) .app-titlebar {
+      min-height: 64px;
     }
+
+    body:has(#appHome:not([hidden])) .app-titlebar h1 {
+      gap: 9px;
+      padding-inline: 8px;
+      font-size: 31px;
+    }
+
+    body:has(#appHome:not([hidden])) .app-titlebar h1::before {
+      width: 40px;
+      height: 40px;
+      flex-basis: 40px;
+      font-size: 32px;
+    }
+  }
+
+  .titlebar-language {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .titlebar-language .seg {
+    width: 210px;
+    height: 36px;
+  }
+
+  #exerciseControls {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  #exerciseControls .exercise-field {
+    position: relative;
+    min-width: 0;
+    gap: 0;
+  }
+
+  #exerciseControls .exercise-field > label {
+    position: absolute;
+    z-index: 12;
+    top: calc(100% + 5px);
+    bottom: auto;
+    left: 50%;
+    width: max-content;
+    max-width: 220px;
+    padding: 5px 8px;
+    border-radius: 5px;
+    color: #ffffff;
+    background: #172331;
+    box-shadow: 0 4px 12px rgba(20, 34, 51, .18);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -4px);
+    transition: opacity .14s ease, transform .14s ease;
+  }
+
+  #exerciseControls .exercise-field:hover > label,
+  #exerciseControls .exercise-field:focus-within > label {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  #exerciseControls .exercise-field > select,
+  #exerciseControls .exercise-field > .seg {
+    width: 100%;
+    min-width: 0;
+    height: 38px;
+  }
+
+  #exerciseControls .exercise-field > .seg > button {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  #exerciseAccidentals { margin-top: 0; }
+
+  .audio-source-btn {
+    min-width: 78px;
+    height: 34px;
+    padding: 0 7px;
+    gap: 5px;
+    justify-content: center;
+    color: #ffffff;
+    border-color: #1d4ed8;
+    background: #2563eb;
+    font-size: 11px;
+    font-weight: 900;
+  }
+
+  .audio-source-btn .speaker-icon {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 16px;
+  }
+
+  .audio-source-btn .speaker-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .audio-source-btn.video-source {
+    border-color: #0b665f;
+    background: #0f8f83;
+  }
+
+  .audio-source-btn:disabled {
+    color: #1f2f46;
+    border-color: #a6b2c1;
+    background: #e5eaf0;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .55);
+    opacity: 1;
+  }
+
+  #partitionControlsWrap .partition-panel {
+    grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr);
+    gap: 6px 10px;
+  }
+
+  #partitionControlsWrap .partition-primary-row {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #partitionControlsWrap .partition-playback-row,
+  #partitionControlsWrap .partition-loop-row {
+    min-width: 0;
+    flex-wrap: nowrap;
+  }
+
+  #partitionControlsWrap .partition-playback-row {
+    grid-column: 1;
+  }
+
+  #partitionControlsWrap .partition-playback-row > .partition-field {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  #partitionControlsWrap .partition-playback-row > .partition-field:nth-child(2) {
+    flex: 1 1 210px;
+  }
+
+  #partitionControlsWrap .partition-playback-row > .partition-field:nth-child(3) {
+    margin-left: 10px;
+  }
+
+  #partitionControlsWrap .partition-playback-row > .partition-field:nth-child(2),
+  #partitionControlsWrap .partition-playback-row > .partition-field:nth-child(3) {
+    position: relative;
+  }
+
+  #partitionControlsWrap .partition-playback-row > .partition-field:nth-child(2) > label,
+  #partitionControlsWrap .partition-playback-row > .partition-field:nth-child(3) > label {
+    position: absolute;
+    z-index: 12;
+    bottom: calc(100% + 5px);
+    left: 50%;
+    padding: 5px 8px;
+    border-radius: 5px;
+    color: #ffffff;
+    background: #172331;
+    box-shadow: 0 4px 12px rgba(20, 34, 51, .18);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 4px);
+    transition: opacity .14s ease, transform .14s ease;
+  }
+
+  #partitionControlsWrap .partition-playback-row > .partition-field:nth-child(2):hover > label,
+  #partitionControlsWrap .partition-playback-row > .partition-field:nth-child(2):focus-within > label,
+  #partitionControlsWrap .partition-playback-row > .partition-field:nth-child(3):hover > label,
+  #partitionControlsWrap .partition-playback-row > .partition-field:nth-child(3):focus-within > label {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  #partitionControlsWrap .partition-playback-row .tempo-slider-wrap {
+    width: min(20vw, 220px);
+  }
+
+  #partitionControlsWrap .partition-loop-row {
+    grid-column: 2;
+  }
+
+  #partitionControlsWrap .partition-loop-row .partition-field {
+    position: relative;
+    flex-wrap: nowrap;
+  }
+
+  .loop-hover-help {
+    position: absolute;
+    z-index: 14;
+    top: calc(100% + 6px);
+    left: 50%;
+    width: max-content;
+    max-width: 280px;
+    padding: 6px 9px;
+    border-radius: 5px;
+    color: #ffffff;
+    background: #172331;
+    box-shadow: 0 4px 12px rgba(20, 34, 51, .18);
+    font-size: 11px;
+    font-weight: 750;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -4px);
+    transition: opacity .14s ease, transform .14s ease;
+  }
+
+  #partitionControlsWrap .partition-loop-row .partition-field:hover .loop-hover-help,
+  #partitionControlsWrap .partition-loop-row .partition-field:focus-within .loop-hover-help {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  #partitionControlsWrap .partition-loop-row #partitionLoopInfo {
+    display: none !important;
+  }
+
+  #partitionControlsWrap .timeline-bar-wrap {
+    grid-column: 1 / -1;
+  }
+
+  .partition-playback-row .midi-status { margin: 0; }
+
+  @media (max-width: 820px) {
+    .app-home-grid { grid-template-columns: 1fr; }
+    .app-choice { min-height: 92px; }
 
     .partition-language {
       justify-content: space-between;
@@ -1575,6 +2091,39 @@
     .partition-row-balanced > .partition-field:first-child {
       grid-column: 1 / -1;
     }
+
+    .app-titlebar {
+      grid-template-columns: 48px minmax(0, 1fr) 190px;
+      gap: 6px;
+    }
+
+    .titlebar-language .seg { width: 190px; }
+
+    #exerciseControls {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 5px;
+    }
+
+    #partitionControlsWrap .partition-panel {
+      grid-template-columns: 1fr;
+    }
+
+    #partitionControlsWrap .partition-primary-row,
+    #partitionControlsWrap .partition-playback-row,
+    #partitionControlsWrap .partition-loop-row,
+    #partitionControlsWrap .timeline-bar-wrap {
+      grid-column: 1;
+    }
+
+    body.partition-video-mode .partition-panel {
+      grid-template-columns: 1fr;
+    }
+
+    body.partition-video-mode .partition-playback-row,
+    body.partition-video-mode .partition-loop-row,
+    body.partition-video-mode .timeline-bar-wrap {
+      grid-column: 1;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1589,233 +2138,252 @@
   }
 
 
-/* Accueil musical — autonome, sans ressource externe. */
-[hidden] { display: none !important; }
-body.home-open { padding:0; background:#f8f6f2; }
-.welcome { --violet:#7350ce; --dark:#282135; color:var(--dark); min-height:100dvh; overflow:hidden; position:relative; isolation:isolate; background:radial-gradient(ellipse at 85% 28%,#eae2f37d,transparent 42%),radial-gradient(ellipse at 5% 65%,#f2e6d875,transparent 40%),#f8f6f2; }
-.welcome::before { content:''; position:absolute; width:580px; height:580px; border:1px solid #8e7ba410; border-radius:50%; top:-380px; left:calc(50% - 290px); box-shadow:0 0 0 65px #8e7ba406,0 0 0 130px #8e7ba404; z-index:-1; }
-.welcome-inner { max-width:1120px; padding:0 38px; margin:auto; }
-.welcome-header { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:27px 0; border-bottom:1px solid #34234212; }
-.welcome-brand { display:flex; align-items:center; gap:11px; font-size:16px; font-weight:700; letter-spacing:-.5px; }
-.welcome-logo { width:36px; height:36px; display:grid; place-items:center; border-radius:12px; color:white; background:#7350ce; box-shadow:0 5px 15px #7350ce20; }
-.welcome-logo svg { width:22px; height:22px; }
-.welcome-tools { display:flex; align-items:center; gap:18px; }
-.welcome-device { color:#797280; font-size:11px; letter-spacing:.03em; }
-.welcome-language { display:flex; align-items:center; padding:3px; gap:2px; border:1px solid #ded8e6; border-radius:30px; background:#fffdfa99; }
-.welcome-language button { min-width:28px; border:0; border-radius:20px; padding:5px 6px; color:#897e91; background:transparent; font:700 9px/1 system-ui,sans-serif; letter-spacing:.08em; cursor:pointer; }
-.welcome-language button.on { color:#fff; background:#7350ce; box-shadow:0 2px 6px #7350ce35; }
-.welcome-language button:focus-visible { outline:2px solid #7350ce; outline-offset:2px; }
-.welcome-hero { position:relative; text-align:center; padding:43px 0 32px; }
-.welcome-eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:10px; font-weight:700; letter-spacing:.19em; text-transform:uppercase; color:#806894; }
-.welcome-eyebrow::before { content:''; height:5px; width:5px; background:#9775cf; border-radius:50%; }
-.welcome h1 { margin:16px 0 17px; color:#302639; font:normal clamp(42px,5.2vw,66px)/1.05 Georgia,'Times New Roman',serif; letter-spacing:-2.8px; }
-.welcome h1 em { font-weight:normal; color:var(--violet); }
-.welcome-intro { font-size:14px; line-height:1.8; color:#79717e; margin:0; }
-.welcome-float { position:absolute; color:#aa93c0; font:46px Georgia,serif; animation:welcome-float 6s ease-in-out infinite; user-select:none; opacity:.5; }
-.welcome-float.one { left:8%; top:80px; transform:rotate(-15deg); }
-.welcome-float.two { right:9%; top:135px; font-size:34px; animation-delay:-3s; }
-.welcome-choice-label { display:flex; align-items:center; gap:14px; margin:0 0 16px; color:#98909c; font-size:10px; text-transform:uppercase; letter-spacing:.18em; }
-.welcome-choice-label::before,.welcome-choice-label::after { content:''; height:1px; flex:1; background:#ded7e0; }
-.welcome-choices { display:grid; grid-template-columns:1fr 1fr; gap:23px; }
-.welcome-choice { position:relative; appearance:none; width:100%; text-align:left; display:flex; flex-direction:column; padding:25px 29px 23px; border:1px solid #e3dce8; border-radius:22px; color:var(--dark); background:linear-gradient(145deg,#fffefc,#fbf8fc); cursor:pointer; font-family:inherit; box-shadow:0 8px 26px #34234208; transition:transform .42s cubic-bezier(.2,.8,.2,1),box-shadow .42s ease,border-color .42s ease,color .32s ease,background .42s ease; overflow:hidden; }
-.welcome-choice > * { position:relative; z-index:1; }
-.welcome-choice::before { content:''; position:absolute; z-index:0; inset:0; pointer-events:none; background:linear-gradient(135deg,#2385e8 0%,#3667d9 48%,#5847bd 100%); opacity:0; transition:opacity .46s ease; }
-.welcome-choice::after { content:''; position:absolute; z-index:0; inset:-35% -55%; pointer-events:none; background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.34) 48%,transparent 61%); transform:translateX(-70%) rotate(5deg); opacity:0; transition:transform .75s cubic-bezier(.2,.75,.2,1),opacity .25s ease; }
-.welcome-choice:hover,.welcome-choice:focus-visible { color:#fff; transform:translateY(-6px) scale(1.01); box-shadow:0 22px 48px rgba(45,92,192,.28),0 7px 18px rgba(63,59,146,.18); border-color:#8ab8ff; }
-.welcome-choice:hover::before,.welcome-choice:focus-visible::before { opacity:1; }
-.welcome-choice:hover::after,.welcome-choice:focus-visible::after { transform:translateX(70%) rotate(5deg); opacity:1; }
-.welcome-choice:active { transform:translateY(-2px); }
-.welcome-choice:focus-visible,.welcome-back:focus-visible { outline:3px solid #b383fa; outline-offset:5px; }
-.welcome-choice.is-partition { color:var(--dark); background:linear-gradient(145deg,#f6f1fb,#eee7f6); border-color:#d8cce5; }
-.welcome-choice.is-partition:hover,.welcome-choice.is-partition:focus-visible { color:#fff; border-color:#8ab8ff; }
-.welcome-card-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.welcome-category { display:inline-flex; align-items:center; gap:7px; color:#806b97; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.15em; }
-.is-partition .welcome-category { color:#806b97; }
-.welcome-number { font:italic 16px Georgia,serif; color:#baafc6; }
-.is-partition .welcome-number { color:#a696b9; }
-.welcome-art { width:100%; height:112px; display:block; overflow:visible; margin:11px 0 4px; }
-.welcome-art .staff-line { stroke:currentColor; opacity:.18; stroke-width:1; }
-.welcome-note { fill:currentColor; stroke:currentColor; stroke-width:1.8; }
-.welcome-note.pulse { animation:welcome-note 4.8s ease-in-out infinite; }
-.welcome-note.pulse:nth-child(2) { animation-delay:.8s; }
-.welcome-note.pulse:nth-child(3) { animation-delay:1.6s; }
-.welcome-note.pulse:nth-child(4) { animation-delay:2.4s; }
-.welcome-note.pulse:nth-child(5) { animation-delay:3.2s; }
-.welcome-falling-note { transform-box:fill-box; transform-origin:center; animation:welcome-note-fall 7.5s cubic-bezier(.26,.7,.34,1) var(--fall-delay) infinite both; }
-.welcome-note-name { fill:#8a70a3; font:700 13px/1 system-ui,sans-serif; letter-spacing:.04em; animation:welcome-note-name-fade 7.5s ease var(--fall-delay) infinite both; }
-.welcome-note-symbol { opacity:0; animation:welcome-note-symbol-appear 7.5s ease var(--fall-delay) infinite both; }
-.welcome-scroll { animation:welcome-scroll 9s linear infinite; }
-.welcome-playline { stroke:#c9a9fb; stroke-width:2; }
-.welcome-choice h2 { margin:0 0 9px; font:normal 31px/1.12 Georgia,'Times New Roman',serif; letter-spacing:-.8px; }
-.welcome-card-copy { margin:0; font-size:12px; line-height:1.8; color:#817588; max-width:340px; }
-.is-partition .welcome-card-copy { color:#817588; }
-.welcome-tags { display:flex; flex-wrap:wrap; gap:6px; margin:17px 0 21px; }
-.welcome-tags span { display:inline-block; padding:5px 9px; border-radius:6px; font-size:9px; color:#897298; background:#f5f0f8; }
-.is-partition .welcome-tags span { color:#806b97; background:#fff9; border:1px solid #ded3e8; }
-.welcome-card-action { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:auto; padding-top:17px; border-top:1px solid #eae3ee; color:#7550ac; font-size:12px; font-weight:650; }
-.is-partition .welcome-card-action { color:#7550ac; border-color:#ded3e8; }
-.welcome-arrow { width:29px; height:29px; display:grid; place-items:center; border-radius:50%; background:#f2ecf9; transition:transform .3s; font-size:18px; font-weight:400; }
-.is-partition .welcome-arrow { background:#e8dff2; }
-.welcome-choice:hover .welcome-category,.welcome-choice:focus-visible .welcome-category,.welcome-choice:hover .welcome-number,.welcome-choice:focus-visible .welcome-number { color:#dcecff; }
-.welcome-choice:hover .welcome-card-copy,.welcome-choice:focus-visible .welcome-card-copy { color:#e1edff; }
-.welcome-choice:hover .welcome-tags span,.welcome-choice:focus-visible .welcome-tags span { color:#f0f6ff; background:#ffffff18; border-color:#ffffff2b; }
-.welcome-choice:hover .welcome-card-action,.welcome-choice:focus-visible .welcome-card-action { color:#fff; border-color:#ffffff3b; }
-.welcome-choice:hover .welcome-arrow,.welcome-choice:focus-visible .welcome-arrow { color:#fff; background:#ffffff20; transform:translateX(3px) rotate(8deg); }
-.welcome-choice:hover .welcome-art,.welcome-choice:focus-visible .welcome-art { filter:brightness(1.18) saturate(.85); }
-.welcome-bottom { display:flex; align-items:center; justify-content:center; gap:20px; padding:30px 0 26px; }
-.welcome-mini-piano { width:115px; height:39px; display:flex; gap:2px; padding:4px; background:#3c3245; border-radius:5px; transform:rotate(-5deg); box-shadow:0 5px 10px #28213515; }
-.welcome-mini-piano i { flex:1; position:relative; border-radius:0 0 2px 2px; background:#fcf9f3; animation:welcome-key 5.6s infinite; }
-.welcome-mini-piano i:nth-child(7n+1)::after,.welcome-mini-piano i:nth-child(7n+2)::after,.welcome-mini-piano i:nth-child(7n+4)::after,.welcome-mini-piano i:nth-child(7n+5)::after,.welcome-mini-piano i:nth-child(7n+6)::after { content:''; position:absolute; right:-4px; top:0; width:6px; height:20px; z-index:1; background:#3c3245; border-radius:0 0 2px 2px; }
-.welcome-bottom p { font-size:11px; color:#8d8197; line-height:1.8; margin:0; }
-.welcome-bottom strong { color:#66576e; font-weight:500; }
-.welcome-footer { display:flex; justify-content:space-between; gap:15px; border-top:1px solid #34234212; padding:16px 0 20px; font-size:9px; letter-spacing:.02em; color:#a196aa; }
-.welcome-reveal { animation:welcome-reveal .8s both; }
-.welcome-choices { animation-delay:.15s; }
-.welcome-bottom { animation-delay:.3s; }
-.welcome-back { display:inline-flex; gap:8px; align-items:center; border:1px solid #ddd5e8; color:#72539b; border-radius:20px; background:#fbf8ff; padding:8px 13px; margin:4px 0 12px; font:600 12px system-ui,sans-serif; cursor:pointer; }
-.welcome-back:hover { background:#f0e8fb; }
-.welcome-enter { animation:welcome-reveal .35s both; }
-.welcome.motion-paused .welcome-float,.welcome.motion-paused .welcome-note,.welcome.motion-paused .welcome-falling-note,.welcome.motion-paused .welcome-note-name,.welcome.motion-paused .welcome-note-symbol,.welcome.motion-paused .welcome-scroll,.welcome.motion-paused .welcome-mini-piano i { animation-play-state:paused !important; }
-@keyframes welcome-float { 0%,100% { translate:0 0; rotate:-10deg; } 50% { translate:0 -13px; rotate:7deg; } }
-@keyframes welcome-note { 0%,16%,100% { color:#b5a3c7; } 24%,40% { color:#8053d1; } }
-@keyframes welcome-note-fall { 0% { transform:translate(var(--fall-x),-54px) rotate(var(--fall-rotate)); } 20% { transform:translate(var(--fall-mid-x),-28px) rotate(var(--fall-mid-rotate)); } 45%,100% { transform:translate(0,0) rotate(0deg); } }
-@keyframes welcome-note-name-fade { 0%,40% { opacity:1; } 51%,100% { opacity:0; } }
-@keyframes welcome-note-symbol-appear { 0%,47% { opacity:0; } 54%,100% { opacity:1; } }
-@keyframes welcome-scroll { to { transform:translateX(-320px); } }
-@keyframes welcome-key { 0%,10%,26%,100% { background:#fcf9f3; } 14%,22% { background:#b89be3; } }
-@keyframes welcome-reveal { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
-@media (min-width:541px) {
-  .welcome { height:100dvh; min-height:0; }
-  .welcome-inner { height:100%; display:grid; grid-template-rows:auto auto auto auto 1fr auto; }
-  .welcome-header { padding:clamp(16px,2.6vh,23px) 0; }
-  .welcome-hero { display:flex; flex-direction:column; justify-content:center; padding:clamp(15px,2.4vh,24px) 0 clamp(11px,1.8vh,18px); }
-  .welcome h1 { margin:8px 0 9px; font-size:clamp(40px,4.4vw,58px); }
-  .welcome-intro { font-size:12px; line-height:1.6; }
-  .welcome-choice-label { margin-bottom:10px; }
-  .welcome-choice { padding:14px clamp(20px,2.2vw,25px) 12px; }
-  .welcome-art { height:70px; margin:2px 0; }
-  .welcome-choice h2 { margin:0 0 6px; font-size:28px; }
-  .welcome-card-copy { font-size:11px; line-height:1.5; }
-  .welcome-tags { margin:8px 0 10px; }
-  .welcome-card-action { padding-top:8px; }
-  .welcome-bottom { align-self:end; padding:18px 0 12px; }
-  .welcome-footer { padding:9px 0 12px; }
-}
-@media (min-width:541px) and (max-height:680px) {
-  .welcome-inner { grid-template-rows:auto auto auto auto 1fr auto; }
-  .welcome-header { padding:10px 0; }
-  .welcome-hero { min-height:0; padding:8px 0; }
-  .welcome h1 { font-size:clamp(36px,5vw,50px); margin:6px 0; }
-  .welcome-intro { font-size:11px; line-height:1.4; }
-  .welcome-choice { padding:11px 18px 10px; }
-  .welcome-art { height:48px; margin:1px 0; }
-  .welcome-choice h2 { margin:0 0 5px; font-size:24px; }
-  .welcome-card-copy { font-size:10px; line-height:1.4; }
-  .welcome-tags { display:none; }
-  .welcome-card-action { padding-top:7px; font-size:10px; }
-  .welcome-bottom { display:none; }
-  .welcome-footer { padding:6px 0 8px; }
-}
-@media (max-width:700px) { .welcome-inner { padding:0 23px; } .welcome-header { padding:21px 0; } .welcome-device { display:none; } .welcome-brand { font-size:14px; } .welcome-tools { gap:8px; } .welcome-hero { padding:37px 0 30px; } .welcome h1 { letter-spacing:-1.9px; } .welcome-intro { font-size:12px; } .welcome-float.one { left:0; top:42px; font-size:28px; } .welcome-float.two { right:0; top:153px; font-size:25px; } .welcome-choices { gap:15px; } .welcome-choice { padding:21px; } .welcome-choice h2 { font-size:27px; } .welcome-tags { margin:14px 0 17px; } }
-@media (max-width:540px) { .welcome-choices { grid-template-columns:1fr; } .welcome-choice { padding:20px; } .welcome-art { height:83px; margin:3px 0; } .welcome-card-copy { max-width:none; } .welcome-choice h2 { font-size:30px; } .welcome-hero { padding-bottom:28px; } .welcome-choice-label { font-size:9px; } .welcome-footer { font-size:8px; } .welcome-bottom { gap:16px; } }
-@media (prefers-reduced-motion:reduce) { .welcome *, .welcome-enter { animation:none !important; transition:none !important; } }
+/* Nouvel accueil uniquement — les écrans d’exercice restent inchangés. */
+body:has(#appHome:not([hidden])) { padding:0; overflow:hidden; background:#f8f6f2; }
+body:has(#appHome:not([hidden])) .wrap { width:100%; height:100dvh; }
+body:has(#appHome:not([hidden])) .app-titlebar,
+body:has(#appHome:not([hidden])) > .wrap > .subtitle { display:none; }
+body:has(#appHome:not([hidden])) .card { width:100%; height:100%; padding:0; overflow:hidden; border:0; border-radius:0; box-shadow:none; background:transparent; }
+.app-home { --home-blue:#2e73df; --home-violet:#684bc8; display:block; min-height:0; height:100%; padding:0; overflow:hidden; color:#2e2537; background:radial-gradient(ellipse at 84% 30%,#eae2f380,transparent 42%),radial-gradient(ellipse at 7% 68%,#f2e6d878,transparent 40%),#f8f6f2; }
+.new-home-shell { width:min(1080px,calc(100% - 46px)); height:100%; margin:auto; display:grid; grid-template-rows:auto auto 1fr auto auto; }
+.new-home-header { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:20px 0; border-bottom:1px solid #3b284214; }
+.new-home-brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:15px; }
+.new-home-logo { width:36px; height:36px; display:grid; place-items:center; border-radius:12px; color:#fff; background:#7350ce; box-shadow:0 5px 15px #7350ce25; font-size:20px; }
+.new-home-header-tools { display:flex; align-items:center; gap:14px; }
+.new-home-device { color:#797280; font-size:10px; }
+.new-home-language { display:flex; padding:3px; gap:2px; border:1px solid #ded8e6; border-radius:30px; background:#fffdfa99; }
+.new-home-language button { min-width:28px; padding:5px 6px; border:0; border-radius:20px; color:#897e91; background:transparent; font:700 9px/1 system-ui,sans-serif; cursor:pointer; }
+.new-home-language button.on { color:#fff; background:#7350ce; box-shadow:0 2px 6px #7350ce35; }
+.theme-toggle { display:grid; width:34px; height:34px; place-items:center; flex:0 0 34px; padding:0; border:1px solid #d7d0df; border-radius:50%; color:#5d4c70; background:#fffdfa; font:700 17px/1 system-ui,sans-serif; cursor:pointer; box-shadow:0 3px 10px #39254c10; transition:transform .25s ease,background .25s ease,color .25s ease,border-color .25s ease; }
+.theme-toggle:hover { transform:rotate(12deg) scale(1.06); border-color:#9d85c6; background:#f1eafa; }
+.app-titlebar .app-theme-toggle { grid-column:1; grid-row:1; justify-self:start; margin-left:54px; }
+.live-midi-sound-btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; min-width:112px; padding:0 9px; color:#657185; border-color:#bac6d4; background:#eef3f8; font-size:10px; font-weight:850; white-space:nowrap; transition:background .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease; }
+.live-midi-sound-btn.on { color:#fff; border-color:#2563eb; background:#2563eb; box-shadow:0 3px 9px #2563eb32; }
+.partition-midi-sound-btn { min-width:32px; width:32px; padding:0; font-size:16px; }
+html[data-theme="night"] .live-midi-sound-btn { color:#b8c6d8; border-color:#45566b; background:#1c2735; }
+html[data-theme="night"] .live-midi-sound-btn.on { color:#fff; border-color:#4f83ef; background:#2563eb; }
+.new-home-hero { position:relative; text-align:center; padding:18px 0 15px; }
+.new-home-eyebrow { display:inline-flex; align-items:center; gap:8px; color:#806894; font-size:9px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; }
+.new-home-eyebrow::before { content:''; width:5px; height:5px; border-radius:50%; background:#9775cf; }
+.new-home-hero h2 { margin:9px 0 8px; color:#302639; font:normal clamp(39px,4.3vw,56px)/1.02 Georgia,'Times New Roman',serif; letter-spacing:-2px; }
+.new-home-hero h2 em { color:#7350ce; font-weight:normal; }
+.new-home-hero p { margin:0; color:#79717e; font-size:12px; line-height:1.55; }
+.new-home-float { position:absolute; color:#aa93c0; font:37px Georgia,serif; opacity:.45; animation:new-home-float 6s ease-in-out infinite; }
+.new-home-float.one { left:8%; top:65px; }
+.new-home-float.two { right:9%; top:115px; font-size:29px; animation-delay:-3s; }
+.new-home-choices { width:100%; align-self:center; }
+.new-home-choice-label { display:flex; align-items:center; gap:14px; margin:0 0 10px; color:#98909c; font-size:9px; text-transform:uppercase; letter-spacing:.18em; }
+.new-home-choice-label::before,.new-home-choice-label::after { content:''; height:1px; flex:1; background:#ded7e0; }
+.app-home-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+.app-choice.new-home-choice { position:relative; display:flex; min-height:0; flex-direction:column; align-items:stretch; gap:0; padding:14px 24px 12px; overflow:hidden; color:#2e2537; border:1px solid #e0d7e7; border-radius:20px; background:linear-gradient(145deg,#fffefc,#fbf8fc); box-shadow:0 8px 26px #34234208; text-align:left; isolation:isolate; transition:transform .42s cubic-bezier(.2,.8,.2,1),box-shadow .42s ease,border-color .42s ease,color .32s ease; }
+.app-choice.new-home-choice:nth-child(2) { --choice-accent:#7350ce; background:linear-gradient(145deg,#f6f1fb,#eee7f6); }
+.app-choice.new-home-choice::before { content:''; position:absolute; z-index:-1; inset:0; opacity:0; background:linear-gradient(135deg,#2385e8 0%,#3667d9 48%,#5847bd 100%); transition:opacity .46s ease; }
+.app-choice.new-home-choice::after { content:''; position:absolute; z-index:0; inset:-35% -55%; opacity:0; pointer-events:none; background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.34) 48%,transparent 61%); transform:translateX(-70%) rotate(5deg); transition:transform .75s cubic-bezier(.2,.75,.2,1),opacity .25s ease; animation:none; }
+.app-choice.new-home-choice:hover,.app-choice.new-home-choice:focus-visible { color:#fff; transform:translateY(-6px) scale(1.01); border-color:#8ab8ff; box-shadow:0 22px 48px rgba(45,92,192,.28),0 7px 18px rgba(63,59,146,.18); }
+.app-choice.new-home-choice:hover::before,.app-choice.new-home-choice:focus-visible::before { opacity:1; }
+.app-choice.new-home-choice:hover::after,.app-choice.new-home-choice:focus-visible::after { opacity:1; transform:translateX(70%) rotate(5deg); }
+.new-home-choice > * { position:relative; z-index:1; }
+.new-home-card-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.new-home-category { color:#806b97; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.14em; }
+.new-home-number { color:#a696b9; font:italic 15px Georgia,serif; }
+.new-home-art { display:block; width:100%; height:70px; margin:2px 0; overflow:visible; transition:filter .3s ease; }
+.new-home-staff-line { stroke:currentColor; opacity:.18; stroke-width:1; }
+.new-home-note { fill:currentColor; stroke:currentColor; stroke-width:1.8; }
+.new-home-falling { transform-box:fill-box; transform-origin:center; animation:new-home-note-fall 7.5s cubic-bezier(.26,.7,.34,1) var(--fall-delay) infinite both; }
+.new-home-note-name { fill:#8a70a3; font:700 13px system-ui,sans-serif; animation:new-home-name-fade 7.5s ease var(--fall-delay) infinite both; }
+.new-home-note-symbol { opacity:0; animation:new-home-symbol-show 7.5s ease var(--fall-delay) infinite both; }
+.new-home-scroll { animation:new-home-scroll 9s linear infinite; }
+.new-home-card-title { margin:0 0 6px; font:normal 28px/1.1 Georgia,'Times New Roman',serif; letter-spacing:-.6px; }
+.new-home-card-copy { max-width:390px; color:#817588; font-size:11px; line-height:1.5; }
+.new-home-tags { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 10px; }
+.new-home-tags span { padding:5px 9px; border:1px solid transparent; border-radius:6px; color:#806b97; background:#f2ecf8; font-size:9px; }
+.new-home-card-action { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:auto; padding-top:8px; border-top:1px solid #ded3e8; color:#7550ac; font-size:12px; font-weight:750; }
+.new-home-arrow { width:29px; height:29px; display:grid; place-items:center; border-radius:50%; background:#e8dff2; font-size:17px; transition:transform .3s ease; }
+.new-home-choice:hover .new-home-category,.new-home-choice:focus-visible .new-home-category,.new-home-choice:hover .new-home-number,.new-home-choice:focus-visible .new-home-number { color:#dcecff; }
+.new-home-choice:hover .new-home-card-copy,.new-home-choice:focus-visible .new-home-card-copy { color:#e1edff; }
+.new-home-choice:hover .new-home-tags span,.new-home-choice:focus-visible .new-home-tags span { color:#fff; background:#ffffff18; border-color:#ffffff2b; }
+.new-home-choice:hover .new-home-card-action,.new-home-choice:focus-visible .new-home-card-action { color:#fff; border-color:#ffffff3b; }
+.new-home-choice:hover .new-home-arrow,.new-home-choice:focus-visible .new-home-arrow { color:#fff; background:#ffffff20; transform:translateX(3px) rotate(8deg); }
+.new-home-choice:hover .new-home-art,.new-home-choice:focus-visible .new-home-art { filter:brightness(1.18) saturate(.85); }
+.new-home-bottom { align-self:end; display:flex; align-items:center; justify-content:center; gap:18px; padding:18px 0 12px; }
+.new-home-piano { position:relative; width:132px; height:42px; display:flex; gap:1px; padding:4px; border-radius:7px; background:linear-gradient(145deg,#43384d,#2f2838); transform:rotate(-5deg); box-shadow:0 7px 16px #28213525,inset 0 1px 0 #ffffff18; perspective:180px; }
+.new-home-piano i { position:relative; flex:1; border-radius:0 0 2px 2px; background:linear-gradient(180deg,#fffdfa,#eee9e3); box-shadow:inset 0 -2px 2px #b9aec020; transform-origin:top; animation:new-home-white-key 6.8s ease-in-out var(--key-delay) infinite; }
+.new-home-piano i:nth-child(7n+1)::after,.new-home-piano i:nth-child(7n+2)::after,.new-home-piano i:nth-child(7n+4)::after,.new-home-piano i:nth-child(7n+5)::after,.new-home-piano i:nth-child(7n+6)::after { content:''; position:absolute; z-index:2; top:0; right:-4px; width:7px; height:22px; border-radius:0 0 3px 3px; background:linear-gradient(180deg,#332b3b,#17131c); box-shadow:0 2px 3px #0006; transform-origin:top; animation:new-home-black-key 6.8s ease-in-out calc(var(--key-delay) + .23s) infinite; }
+.new-home-piano::after { content:''; position:absolute; inset:auto 8px 2px; height:2px; border-radius:50%; background:#8a64df; opacity:.18; filter:blur(3px); animation:new-home-piano-glow 1.7s ease-in-out infinite; }
+.new-home-bottom p { margin:0; color:#8d8197; font-size:10px; line-height:1.7; }
+.new-home-bottom strong { color:#66576e; font-weight:600; }
+.new-home-footer { display:flex; justify-content:space-between; gap:15px; padding:9px 0 12px; border-top:1px solid #34234212; color:#a196aa; font-size:8px; }
 
-</style>
+html[data-theme="night"] { color-scheme:dark; --bg:#0c131d; --panel:#151e2a; --panel-2:#1c2735; --ink:#e9eef7; --muted:#9aaabd; --line:#334356; --staff:#edf2fa; --future:#718197; --key-edge:#9aa8b8; --warn-bg:#342b15; --warn-border:#b78018; --warn-text:#f7cc73; }
+html[data-theme="night"] body { color:var(--ink); background:#0c131d; }
+html[data-theme="night"] h1 { color:#f1f5fb; }
+html[data-theme="night"] .subtitle { color:#9aaabd; }
+html[data-theme="night"] .card,html[data-theme="night"] .partition-panel,html[data-theme="night"] .custom-notes,html[data-theme="night"] .voice-panel,html[data-theme="night"] .bar,html[data-theme="night"] .name-pad,html[data-theme="night"] .trainer-body { color:var(--ink); background:var(--panel); border-color:var(--line); }
+html[data-theme="night"] select,html[data-theme="night"] input:not([type="range"]),html[data-theme="night"] .seg,html[data-theme="night"] .btn,html[data-theme="night"] .btn-sm,html[data-theme="night"] .partition-select,html[data-theme="night"] .partition-info-badge { color:var(--ink); background:#1a2634; border-color:#3a4a5d; }
+html[data-theme="night"] .seg button { color:#aebccd; background:transparent; }
+html[data-theme="night"] .seg button.on,html[data-theme="night"] .btn.primary,html[data-theme="night"] .btn-sm.primary { color:#fff; background:#2563eb; border-color:#4f83ef; }
+html[data-theme="night"] .stage { background:#101823; border-color:#334356; }
+html[data-theme="night"] .feedback,html[data-theme="night"] .question,html[data-theme="night"] label,html[data-theme="night"] .partition-field label { color:#a9b7c8; }
+html[data-theme="night"] .theme-toggle { color:#ffe29a; background:#1c2735; border-color:#45566b; }
+html[data-theme="night"] body:has(#appHome:not([hidden])) { background:#0b1019; }
+html[data-theme="night"] .app-home { color:#edf2fa; background:radial-gradient(ellipse at 84% 30%,#33295180,transparent 42%),radial-gradient(ellipse at 7% 68%,#31251d78,transparent 40%),#0b1019; }
+html[data-theme="night"] .new-home-header,html[data-theme="night"] .new-home-footer { border-color:#ffffff16; }
+html[data-theme="night"] .new-home-brand,html[data-theme="night"] .new-home-hero h2 { color:#f4effa; }
+html[data-theme="night"] .new-home-hero p,html[data-theme="night"] .new-home-bottom p,html[data-theme="night"] .new-home-bottom strong { color:#aeb5c5; }
+html[data-theme="night"] .new-home-choice-label { color:#8f98aa; }
+html[data-theme="night"] .new-home-choice-label::before,html[data-theme="night"] .new-home-choice-label::after { background:#ffffff18; }
+html[data-theme="night"] .app-choice.new-home-choice,html[data-theme="night"] .app-choice.new-home-choice:nth-child(2) { color:#edf2fa; background:linear-gradient(145deg,#182231,#141c28); border-color:#344458; box-shadow:0 12px 32px #00000035; }
+html[data-theme="night"] .new-home-card-copy { color:#aeb9c8; }
+html[data-theme="night"] .new-home-tags span { color:#c5b7df; background:#ffffff0c; border-color:#ffffff10; }
+html[data-theme="night"] .new-home-card-action { color:#bda3ee; border-color:#ffffff18; }
+html[data-theme="night"] .new-home-arrow { background:#ffffff0d; }
+/* La partition conserve son papier clair : ses signes doivent donc rester foncés en mode nuit. */
+html[data-theme="night"] #partitionControlsWrap:not([hidden]) ~ .stage #staff { --staff:#17263a; --future:#687a90; --line:#c4ceda; --muted:#52657b; --accent-strong:#075985; }
+/* Affichage vidéo agrandi : une grande vidéo et une partition réduite à environ un centimètre. */
+.partition-video-layout-tools { position:absolute; z-index:3; top:7px; right:7px; display:flex; align-items:center; gap:7px; }
+.partition-video-expand { color:#fff; border-color:rgba(255,255,255,.6); background:rgba(20,28,36,.76); backdrop-filter:blur(3px); }
+.partition-video-expand:hover { color:#fff; border-color:#fff; background:rgba(20,28,36,.94); }
+.compact-clef-picker { display:flex; gap:3px; padding:3px; border:1px solid rgba(255,255,255,.48); border-radius:7px; background:rgba(20,28,36,.78); backdrop-filter:blur(3px); }
+.compact-clef-picker[hidden] { display:none; }
+.compact-clef-picker button { min-width:58px; height:27px; padding:0 8px; border:0; border-radius:5px; color:#fff; background:transparent; font:750 11px/1 system-ui,sans-serif; cursor:pointer; }
+.compact-clef-picker button.on { color:#fff; background:#2563eb; box-shadow:0 2px 7px rgba(0,0,0,.25); }
+body.partition-video-expanded { height:100dvh; overflow:hidden; }
+body.partition-video-expanded .wrap { display:flex; height:100%; min-height:0; flex-direction:column; }
+body.partition-video-expanded .card { display:flex; min-height:0; flex:1 1 auto; flex-direction:column; }
+body.partition-video-expanded #appWorkspace { display:flex; min-height:0; flex:1 1 auto; flex-direction:column; }
+body.partition-video-expanded #partitionControlsWrap { flex:0 0 auto; }
+body.partition-video-expanded .partition-video-wrap { width:min(100%,1180px); height:auto; min-height:0; max-height:none; flex:1 1 auto; margin-bottom:4px; }
+body.partition-video-expanded .partition-video { display:block; width:auto; height:auto; max-width:100%; max-height:100%; object-fit:contain; object-position:center center; }
+body.partition-video-expanded .stage { position:relative; height:114px; min-height:114px; flex:0 0 114px; margin-top:4px; padding:0; overflow:hidden; border-radius:6px; }
+body.partition-video-expanded .stage #staff { width:100%; height:112px; min-height:112px; }
+body.partition-video-expanded .question-row,body.partition-video-expanded .feedback { display:none; }
+@media (max-height:650px) { body.partition-video-expanded .stage { height:104px; min-height:104px; flex-basis:104px; } body.partition-video-expanded .stage #staff { height:102px; min-height:102px; } }
+/* Le thème ne modifie jamais l’apparence des touches du piano. */
+html[data-theme="night"] .keyboard { background:#20242b; border-color:#9aa8b8; }
+html[data-theme="night"] .key.white { color:#17212f; background:linear-gradient(180deg,#ffffff 0%,#f3f7fb 75%,#dbe3ed 100%); border-right-color:#9aa8b8; }
+html[data-theme="night"] .key.black { color:#f8fafc; background:linear-gradient(180deg,#303844 0%,#111827 100%); border-color:#0b1018; box-shadow:0 8px 16px rgba(16,24,32,.35); }
+@keyframes new-home-float { 0%,100% { translate:0 0; rotate:-10deg; } 50% { translate:0 -12px; rotate:7deg; } }
+@keyframes new-home-note-fall { 0% { transform:translate(var(--fall-x),-54px) rotate(var(--fall-rotate)); } 20% { transform:translate(var(--fall-mid-x),-28px) rotate(var(--fall-mid-rotate)); } 45%,100% { transform:translate(0,0) rotate(0deg); } }
+@keyframes new-home-name-fade { 0%,40% { opacity:1; } 51%,100% { opacity:0; } }
+@keyframes new-home-symbol-show { 0%,47% { opacity:0; } 54%,100% { opacity:1; } }
+@keyframes new-home-scroll { to { transform:translateX(-320px); } }
+@keyframes new-home-white-key { 0%,7%,100% { transform:rotateX(0) translateY(0); background:linear-gradient(180deg,#fffdfa,#eee9e3); box-shadow:inset 0 -2px 2px #b9aec020; } 1.5%,4.6% { transform:rotateX(-7deg) translateY(2px); background:linear-gradient(180deg,#d9c7ff,#9b7be8); box-shadow:0 0 8px #8c68df,inset 0 -2px 3px #6847c0; } }
+@keyframes new-home-black-key { 0%,7%,100% { transform:translateY(0) rotateX(0); background:linear-gradient(180deg,#332b3b,#17131c); box-shadow:0 2px 3px #0006; } 1.5%,4.6% { transform:translateY(2px) rotateX(-6deg); background:linear-gradient(180deg,#6eb8ff,#4c54d8); box-shadow:0 0 9px #5ba7ff; } }
+@keyframes new-home-piano-glow { 0%,100% { opacity:.12; transform:scaleX(.6); } 50% { opacity:.65; transform:scaleX(1); } }
+@media (max-height:680px) and (min-width:541px) {
+  .new-home-header { padding:10px 0; }
+  .new-home-hero { padding:8px 0; }
+  .new-home-hero h2 { margin:5px 0; font-size:clamp(34px,4.5vw,48px); }
+  .new-home-hero p { font-size:10px; line-height:1.4; }
+  .app-choice.new-home-choice { padding:10px 18px 9px; }
+  .new-home-art { height:48px; margin:1px 0; }
+  .new-home-card-title { margin-bottom:4px; font-size:23px; }
+  .new-home-card-copy { font-size:9px; line-height:1.35; }
+  .new-home-tags { display:none; }
+  .new-home-card-action { padding-top:6px; font-size:10px; }
+  .new-home-bottom { display:none; }
+  .new-home-footer { padding:6px 0 8px; }
+}
+@media (max-width:700px) {
+  body:has(#appHome:not([hidden])) { overflow:auto; }
+  body:has(#appHome:not([hidden])) .wrap,body:has(#appHome:not([hidden])) .card,.app-home { height:auto; min-height:100dvh; }
+  .new-home-shell { width:min(100% - 32px,540px); height:auto; display:block; }
+  .new-home-header { padding:18px 0; }
+  .new-home-device { display:none; }
+  .new-home-hero { padding:30px 0 25px; }
+  .new-home-hero h2 { font-size:42px; letter-spacing:-1.5px; }
+  .new-home-hero p { font-size:11px; }
+  .new-home-float.one { left:0; top:45px; font-size:28px; }
+  .new-home-float.two { right:0; top:142px; font-size:24px; }
+  .app-home-grid { grid-template-columns:1fr; gap:14px; }
+  .app-choice.new-home-choice { padding:18px 20px 16px; min-height:0; }
+  .new-home-art { height:78px; }
+  .new-home-bottom { padding:34px 0 26px; }
+  .new-home-footer { padding-bottom:18px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .new-home-float,.new-home-falling,.new-home-note-name,.new-home-note-symbol,.new-home-scroll,.new-home-piano i,.new-home-piano i::after,.new-home-piano::after { animation:none !important; }
+}
 
-<style id="midi-mic-adjustments">
-  /* Pas de point rouge MIDI : le voyant n'apparaît que lorsqu'il devient actif. */
-  #midiDot { display:none; }
-  #midiDot.active, #midiDot.connected, #midiDot.on {
-    display:block;
-  }
 </style>
 </head>
-<body class="home-open">
-<section class="welcome" id="welcomePage" aria-labelledby="welcomeTitle">
- <div class="welcome-inner">
-  <header class="welcome-header">
-   <div class="welcome-brand"><span class="welcome-logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 16V6l10-2v10M9 9l10-2"/><ellipse cx="6" cy="17" rx="3" ry="2.4" fill="currentColor"/><ellipse cx="16" cy="15" rx="3" ry="2.4" fill="currentColor"/></svg></span><span data-welcome-i="brand">L’atelier des notes</span></div>
-   <div class="welcome-tools"><span class="welcome-device">PC · iPad · Casio</span><div class="welcome-language" id="welcomeLangSeg" role="group" aria-label="Langue"><button type="button" data-lang="fr" class="on" aria-label="Français">FR</button><button type="button" data-lang="en" aria-label="English">EN</button></div></div>
-  </header>
-  <div class="welcome-hero welcome-reveal">
-   <span class="welcome-float one" aria-hidden="true">♫</span><span class="welcome-float two" aria-hidden="true">♪</span>
-   <span class="welcome-eyebrow" data-welcome-i="eyebrow">Un peu de pratique, beaucoup de musique</span>
-   <h1 id="welcomeTitle" tabindex="-1" data-welcome-html="title">La musique commence<br><em>par une note.</em></h1>
-   <p class="welcome-intro" data-welcome-html="intro">Apprenez à lire, prenez le rythme et faites sonner vos progrès.<br>Choisissez votre façon de jouer.</p>
-  </div>
-  <p class="welcome-choice-label" data-welcome-i="choiceLabel">À vous de donner le tempo</p>
-  <div class="welcome-choices welcome-reveal">
-   <button class="welcome-choice" id="welcomeExercise" type="button" aria-labelledby="welcomeExerciseTitle" aria-describedby="welcomeExerciseCopy">
-    <span class="welcome-card-top"><span class="welcome-category" data-welcome-i="exerciseCategory">Les premiers accords</span><span class="welcome-number">01</span></span>
-    <svg class="welcome-art" viewBox="0 0 400 112" aria-hidden="true"><path class="staff-line" d="M5 34H395"/><path class="staff-line" d="M5 46H395"/><path class="staff-line" d="M5 58H395"/><path class="staff-line" d="M5 70H395"/><path class="staff-line" d="M5 82H395"/><path d="M80 94h24" stroke="#aa96bd" stroke-width="1"/><text x="12" y="85" fill="#aa96bd" font-size="67" font-family="Georgia,serif">𝄞</text><g><g class="welcome-falling-note" style="--fall-delay:0s;--fall-x:-10px;--fall-mid-x:5px;--fall-rotate:-13deg;--fall-mid-rotate:7deg"><text class="welcome-note-name" data-note-fr="Do" data-note-en="C" x="92" y="94" text-anchor="middle">Do</text><g class="welcome-note welcome-note-symbol"><ellipse cx="92" cy="94" rx="7" ry="4.8" transform="rotate(-22 92 94)"/><path d="M98,93v-29" fill="none"/></g></g><g class="welcome-falling-note" style="--fall-delay:0.8s;--fall-x:8px;--fall-mid-x:-4px;--fall-rotate:12deg;--fall-mid-rotate:-6deg"><text class="welcome-note-name" data-note-fr="Ré" data-note-en="D" x="151" y="88" text-anchor="middle">Ré</text><g class="welcome-note welcome-note-symbol"><ellipse cx="151" cy="88" rx="7" ry="4.8" transform="rotate(-22 151 88)"/><path d="M157,87v-29" fill="none"/></g></g><g class="welcome-falling-note" style="--fall-delay:1.6s;--fall-x:-7px;--fall-mid-x:4px;--fall-rotate:-10deg;--fall-mid-rotate:6deg"><text class="welcome-note-name" data-note-fr="Mi" data-note-en="E" x="210" y="82" text-anchor="middle">Mi</text><g class="welcome-note welcome-note-symbol"><ellipse cx="210" cy="82" rx="7" ry="4.8" transform="rotate(-22 210 82)"/><path d="M216,81v-29" fill="none"/></g></g><g class="welcome-falling-note" style="--fall-delay:2.4s;--fall-x:10px;--fall-mid-x:-5px;--fall-rotate:14deg;--fall-mid-rotate:-7deg"><text class="welcome-note-name" data-note-fr="Fa" data-note-en="F" x="269" y="76" text-anchor="middle">Fa</text><g class="welcome-note welcome-note-symbol"><ellipse cx="269" cy="76" rx="7" ry="4.8" transform="rotate(-22 269 76)"/><path d="M275,75v-29" fill="none"/></g></g><g class="welcome-falling-note" style="--fall-delay:3.2s;--fall-x:-9px;--fall-mid-x:4px;--fall-rotate:-12deg;--fall-mid-rotate:6deg"><text class="welcome-note-name" data-note-fr="Sol" data-note-en="G" x="328" y="70" text-anchor="middle">Sol</text><g class="welcome-note welcome-note-symbol"><ellipse cx="328" cy="70" rx="7" ry="4.8" transform="rotate(-22 328 70)"/><path d="M334,69v-29" fill="none"/></g></g></g></svg>
-    <h2 id="welcomeExerciseTitle" data-welcome-i="exerciseTitle">Série de notes</h2>
-    <p class="welcome-card-copy" id="welcomeExerciseCopy" data-welcome-i="exerciseCopy">Une note après l’autre, entraînez votre regard et vos réflexes avec des séries de 10 notes.</p>
-    <span class="welcome-tags"><span data-welcome-i="exerciseTagOne">10 notes par série</span><span data-welcome-i="exerciseTagTwo">À votre rythme</span></span>
-    <span class="welcome-card-action"><span data-welcome-i="exerciseAction">Commencer une série</span> <span class="welcome-arrow" aria-hidden="true">↗</span></span>
-   </button>
-   <button class="welcome-choice is-partition" id="welcomePartition" type="button" aria-labelledby="welcomePartitionTitle" aria-describedby="welcomePartitionCopy">
-    <span class="welcome-card-top"><span class="welcome-category" data-welcome-i="partitionCategory">La musique en mouvement</span><span class="welcome-number">02</span></span>
-    <svg class="welcome-art" viewBox="0 0 400 112" aria-hidden="true"><defs><clipPath id="welcome-score-clip"><rect x="52" y="0" width="342" height="108"/></clipPath></defs><path class="staff-line" d="M5 34H395"/><path class="staff-line" d="M5 46H395"/><path class="staff-line" d="M5 58H395"/><path class="staff-line" d="M5 70H395"/><path class="staff-line" d="M5 82H395"/><text x="9" y="83" fill="#af98ca" font-size="65" font-family="Georgia,serif">𝄞</text><g clip-path="url(#welcome-score-clip)" color="#c9b2e4"><g class="welcome-scroll"><g transform="translate(72)"><g class="welcome-note "><ellipse cx="0" cy="70" rx="7" ry="4.8" transform="rotate(-22 0 70)"/><path d="M6,69v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="40" cy="58" rx="7" ry="4.8" transform="rotate(-22 40 58)"/><path d="M46,57v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="80" cy="46" rx="7" ry="4.8" transform="rotate(-22 80 46)"/><path d="M86,45v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="120" cy="58" rx="7" ry="4.8" transform="rotate(-22 120 58)"/><path d="M126,57v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="160" cy="64" rx="7" ry="4.8" transform="rotate(-22 160 64)"/><path d="M166,63v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="200" cy="52" rx="7" ry="4.8" transform="rotate(-22 200 52)"/><path d="M206,51v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="240" cy="40" rx="7" ry="4.8" transform="rotate(-22 240 40)"/><path d="M246,39v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="280" cy="58" rx="7" ry="4.8" transform="rotate(-22 280 58)"/><path d="M286,57v-29" fill="none"/></g></g><g transform="translate(392)"><g class="welcome-note "><ellipse cx="0" cy="70" rx="7" ry="4.8" transform="rotate(-22 0 70)"/><path d="M6,69v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="40" cy="58" rx="7" ry="4.8" transform="rotate(-22 40 58)"/><path d="M46,57v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="80" cy="46" rx="7" ry="4.8" transform="rotate(-22 80 46)"/><path d="M86,45v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="120" cy="58" rx="7" ry="4.8" transform="rotate(-22 120 58)"/><path d="M126,57v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="160" cy="64" rx="7" ry="4.8" transform="rotate(-22 160 64)"/><path d="M166,63v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="200" cy="52" rx="7" ry="4.8" transform="rotate(-22 200 52)"/><path d="M206,51v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="240" cy="40" rx="7" ry="4.8" transform="rotate(-22 240 40)"/><path d="M246,39v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="280" cy="58" rx="7" ry="4.8" transform="rotate(-22 280 58)"/><path d="M286,57v-29" fill="none"/></g></g><g transform="translate(712)"><g class="welcome-note "><ellipse cx="0" cy="70" rx="7" ry="4.8" transform="rotate(-22 0 70)"/><path d="M6,69v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="40" cy="58" rx="7" ry="4.8" transform="rotate(-22 40 58)"/><path d="M46,57v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="80" cy="46" rx="7" ry="4.8" transform="rotate(-22 80 46)"/><path d="M86,45v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="120" cy="58" rx="7" ry="4.8" transform="rotate(-22 120 58)"/><path d="M126,57v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="160" cy="64" rx="7" ry="4.8" transform="rotate(-22 160 64)"/><path d="M166,63v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="200" cy="52" rx="7" ry="4.8" transform="rotate(-22 200 52)"/><path d="M206,51v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="240" cy="40" rx="7" ry="4.8" transform="rotate(-22 240 40)"/><path d="M246,39v-29" fill="none"/></g><g class="welcome-note "><ellipse cx="280" cy="58" rx="7" ry="4.8" transform="rotate(-22 280 58)"/><path d="M286,57v-29" fill="none"/></g></g></g></g><rect x="124" y="16" width="27" height="80" rx="13" fill="#c59bf813"/><path class="welcome-playline" d="M137 17v77"/><circle cx="137" cy="16" r="3" fill="#ceafff"/><text class="welcome-score-tag" x="274" y="107" fill="#b3a0c8" font-size="9" font-family="system-ui" letter-spacing="2">À VOTRE TEMPO</text></svg>
-    <h2 id="welcomePartitionTitle" data-welcome-i="partitionTitle">Partition défilante</h2>
-    <p class="welcome-card-copy" id="welcomePartitionCopy" data-welcome-i="partitionCopy">Donnez vie à vos morceaux. Importez un fichier MIDI et suivez les notes au fil de la partition.</p>
-    <span class="welcome-tags"><span data-welcome-i="partitionTagOne">Fichiers MIDI</span><span data-welcome-i="partitionTagTwo">Tempo ajustable</span></span>
-    <span class="welcome-card-action"><span data-welcome-i="partitionAction">Ouvrir une partition</span> <span class="welcome-arrow" aria-hidden="true">↗</span></span>
-   </button>
-  </div>
-  <div class="welcome-bottom welcome-reveal"><div class="welcome-mini-piano" aria-hidden="true"><i style="animation-delay:0s"></i><i style="animation-delay:0.18s"></i><i style="animation-delay:0.36s"></i><i style="animation-delay:0.54s"></i><i style="animation-delay:0.72s"></i><i style="animation-delay:0.8999999999999999s"></i><i style="animation-delay:1.08s"></i><i style="animation-delay:1.26s"></i><i style="animation-delay:1.44s"></i><i style="animation-delay:1.6199999999999999s"></i><i style="animation-delay:1.7999999999999998s"></i><i style="animation-delay:1.98s"></i><i style="animation-delay:2.16s"></i><i style="animation-delay:2.34s"></i></div><p><strong data-welcome-i="bottomStrong">Un petit moment pour jouer. Un grand pas pour progresser.</strong><br><span data-welcome-i="bottomCopy">Sur écran ou avec votre clavier MIDI.</span></p></div>
-  <footer class="welcome-footer"><span data-welcome-i="footerLeft">L’atelier des notes · Le plaisir d’apprendre</span><span data-welcome-i="footerRight">Écouter. Lire. Jouer.</span></footer>
- </div>
-</section>
-
-  <main class="wrap" id="learningApp" hidden>
-<button class="welcome-back" id="welcomeBack" type="button" aria-label="Revenir à l’accueil">← <span data-welcome-i="back">Accueil</span></button>
-    <h1 data-i="title" tabindex="-1">Apprendre à lire les notes</h1>
+<body>
+  <main class="wrap">
+    <header class="app-titlebar">
+      <button type="button" class="btn-sm icon-only titlebar-back" id="homeMenuBtn" title="Retour au menu" aria-label="Retour au menu" hidden>⏎</button>
+      <button type="button" class="theme-toggle app-theme-toggle" id="appThemeToggle" aria-label="Activer le mode nuit" title="Activer le mode nuit">☾</button>
+      <h1 data-i="title">Apprendre à lire les notes</h1>
+      <div class="partition-language titlebar-language" id="partitionLanguageWrap" hidden>
+        <div class="seg" id="partitionLangSeg">
+          <button type="button" data-lang="fr" class="on">Français</button>
+          <button type="button" data-lang="en">English (US)</button>
+        </div>
+      </div>
+    </header>
     <p class="subtitle" data-i="subtitle">Lisez les notes par séries de 10, puis jouez la note active sur le clavier.</p>
 
     <section class="card">
       <div class="midi-warning" id="midiWarning">
-        <div id="midiWarningText"></div>
-        <button type="button" id="midiRetryBtn" style="margin-top:8px;display:none;">Réessayer le MIDI</button>
+        <b>MIDI indisponible</b> — Safari iOS ne supporte pas Web MIDI.<br>
+        Ouvrez cette page dans <b>Web MIDI Browser</b> (App Store) pour utiliser votre piano.
       </div>
 
-      <div class="midi-status" id="midiStatus" style="display:none;">
-        <div class="midi-dot" id="midiDot" title="Activité MIDI"></div>
-        <span id="midiLabel" style="display:none;" aria-hidden="true">MIDI</span>
-        <div class="midi-devices" id="midiDevices"></div>
-      </div>
-
-      
-      <div class="mode-switch-bar">
-        <div class="seg" id="appModeSeg">
-          <button type="button" data-app-mode="exercise" class="on" id="modeExerciseBtn" data-i="exerciseMode">📝 Séries (10 notes)</button>
-          <button type="button" data-app-mode="partition" id="modePartitionBtn" data-i="partitionMode">🎼 Partition défilante (MIDI)</button>
-        </div>
-        <div class="partition-language" id="partitionLanguageWrap" hidden>
-          <label data-i="languageNotation">Langue et noms des notes</label>
-          <div class="seg" id="partitionLangSeg">
-            <button type="button" data-lang="fr" class="on">Français</button>
-            <button type="button" data-lang="en">English (US)</button>
+      <div class="app-home" id="appHome">
+        <div class="new-home-shell">
+          <header class="new-home-header">
+            <div class="new-home-brand"><span class="new-home-logo" aria-hidden="true">♫</span><span data-home-i="brand">L’atelier des notes</span></div>
+            <div class="new-home-header-tools"><span class="new-home-device">PC · iPad · Casio</span><button type="button" class="theme-toggle" id="homeThemeToggle" aria-label="Activer le mode nuit" title="Activer le mode nuit">☾</button><div class="new-home-language" id="homeLangSeg" role="group" aria-label="Langue"><button type="button" data-lang="fr" class="on" aria-label="Français">FR</button><button type="button" data-lang="en" aria-label="English">EN</button></div></div>
+          </header>
+          <div class="new-home-hero">
+            <span class="new-home-float one" aria-hidden="true">♫</span><span class="new-home-float two" aria-hidden="true">♪</span>
+            <span class="new-home-eyebrow" data-home-i="eyebrow">Un peu de pratique, beaucoup de musique</span>
+            <h2 data-home-html="heroTitle">La musique commence<br><em>par une note.</em></h2>
+            <p data-home-html="intro">Apprenez à lire, prenez le rythme et faites sonner vos progrès.<br>Choisissez votre façon de jouer.</p>
           </div>
+          <div class="new-home-choices">
+          <p class="new-home-choice-label" data-home-i="choiceLabel">À vous de donner le tempo</p>
+          <div class="app-home-grid" id="appModeSeg">
+            <button type="button" class="app-choice new-home-choice" data-app-mode="exercise" id="modeExerciseBtn" aria-labelledby="newHomeExerciseTitle" aria-describedby="newHomeExerciseCopy">
+              <span class="new-home-card-top"><span class="new-home-category" data-home-i="exerciseCategory">Les premiers accords</span><span class="new-home-number">01</span></span>
+              <svg class="new-home-art" viewBox="0 0 400 112" aria-hidden="true"><path class="new-home-staff-line" d="M5 34H395"/><path class="new-home-staff-line" d="M5 46H395"/><path class="new-home-staff-line" d="M5 58H395"/><path class="new-home-staff-line" d="M5 70H395"/><path class="new-home-staff-line" d="M5 82H395"/><path d="M80 94h24" stroke="#aa96bd" stroke-width="1"/><text x="12" y="85" fill="#aa96bd" font-size="67" font-family="Georgia,serif">𝄞</text><g><g class="new-home-falling" style="--fall-delay:0s;--fall-x:-10px;--fall-mid-x:5px;--fall-rotate:-13deg;--fall-mid-rotate:7deg"><text class="new-home-note-name" data-note-fr="Do" data-note-en="C" x="92" y="94" text-anchor="middle">Do</text><g class="new-home-note new-home-note-symbol"><ellipse cx="92" cy="94" rx="7" ry="4.8" transform="rotate(-22 92 94)"/><path d="M98,93v-29" fill="none"/></g></g><g class="new-home-falling" style="--fall-delay:0.8s;--fall-x:8px;--fall-mid-x:-4px;--fall-rotate:12deg;--fall-mid-rotate:-6deg"><text class="new-home-note-name" data-note-fr="Ré" data-note-en="D" x="151" y="88" text-anchor="middle">Ré</text><g class="new-home-note new-home-note-symbol"><ellipse cx="151" cy="88" rx="7" ry="4.8" transform="rotate(-22 151 88)"/><path d="M157,87v-29" fill="none"/></g></g><g class="new-home-falling" style="--fall-delay:1.6s;--fall-x:-7px;--fall-mid-x:4px;--fall-rotate:-10deg;--fall-mid-rotate:6deg"><text class="new-home-note-name" data-note-fr="Mi" data-note-en="E" x="210" y="82" text-anchor="middle">Mi</text><g class="new-home-note new-home-note-symbol"><ellipse cx="210" cy="82" rx="7" ry="4.8" transform="rotate(-22 210 82)"/><path d="M216,81v-29" fill="none"/></g></g><g class="new-home-falling" style="--fall-delay:2.4s;--fall-x:10px;--fall-mid-x:-5px;--fall-rotate:14deg;--fall-mid-rotate:-7deg"><text class="new-home-note-name" data-note-fr="Fa" data-note-en="F" x="269" y="76" text-anchor="middle">Fa</text><g class="new-home-note new-home-note-symbol"><ellipse cx="269" cy="76" rx="7" ry="4.8" transform="rotate(-22 269 76)"/><path d="M275,75v-29" fill="none"/></g></g><g class="new-home-falling" style="--fall-delay:3.2s;--fall-x:-9px;--fall-mid-x:4px;--fall-rotate:-12deg;--fall-mid-rotate:6deg"><text class="new-home-note-name" data-note-fr="Sol" data-note-en="G" x="328" y="70" text-anchor="middle">Sol</text><g class="new-home-note new-home-note-symbol"><ellipse cx="328" cy="70" rx="7" ry="4.8" transform="rotate(-22 328 70)"/><path d="M334,69v-29" fill="none"/></g></g></g></svg>
+              <span class="new-home-card-title" id="newHomeExerciseTitle" data-home-i="exerciseTitle">Série de notes</span>
+              <span class="new-home-card-copy" id="newHomeExerciseCopy" data-home-i="exerciseCopy">Une note après l’autre, entraînez votre regard et vos réflexes avec des séries de 10 notes.</span>
+              <span class="new-home-tags"><span data-home-i="exerciseTagOne">10 notes par série</span><span data-home-i="exerciseTagTwo">À votre rythme</span></span>
+              <span class="new-home-card-action"><span data-home-i="exerciseAction">Commencer une série</span><span class="new-home-arrow" aria-hidden="true">↗</span></span>
+            </button>
+            <button type="button" class="app-choice new-home-choice" data-app-mode="partition" id="modePartitionBtn" aria-labelledby="newHomePartitionTitle" aria-describedby="newHomePartitionCopy">
+              <span class="new-home-card-top"><span class="new-home-category" data-home-i="partitionCategory">La musique en mouvement</span><span class="new-home-number">02</span></span>
+              <svg class="new-home-art" viewBox="0 0 400 112" aria-hidden="true"><defs><clipPath id="new-home-score-clip"><rect x="52" y="0" width="342" height="108"/></clipPath></defs><path class="new-home-staff-line" d="M5 34H395"/><path class="new-home-staff-line" d="M5 46H395"/><path class="new-home-staff-line" d="M5 58H395"/><path class="new-home-staff-line" d="M5 70H395"/><path class="new-home-staff-line" d="M5 82H395"/><text x="9" y="83" fill="#af98ca" font-size="65" font-family="Georgia,serif">𝄞</text><g clip-path="url(#new-home-score-clip)" color="#c9b2e4"><g class="new-home-scroll"><g transform="translate(72)"><g class="new-home-note "><ellipse cx="0" cy="70" rx="7" ry="4.8" transform="rotate(-22 0 70)"/><path d="M6,69v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="40" cy="58" rx="7" ry="4.8" transform="rotate(-22 40 58)"/><path d="M46,57v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="80" cy="46" rx="7" ry="4.8" transform="rotate(-22 80 46)"/><path d="M86,45v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="120" cy="58" rx="7" ry="4.8" transform="rotate(-22 120 58)"/><path d="M126,57v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="160" cy="64" rx="7" ry="4.8" transform="rotate(-22 160 64)"/><path d="M166,63v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="200" cy="52" rx="7" ry="4.8" transform="rotate(-22 200 52)"/><path d="M206,51v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="240" cy="40" rx="7" ry="4.8" transform="rotate(-22 240 40)"/><path d="M246,39v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="280" cy="58" rx="7" ry="4.8" transform="rotate(-22 280 58)"/><path d="M286,57v-29" fill="none"/></g></g><g transform="translate(392)"><g class="new-home-note "><ellipse cx="0" cy="70" rx="7" ry="4.8" transform="rotate(-22 0 70)"/><path d="M6,69v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="40" cy="58" rx="7" ry="4.8" transform="rotate(-22 40 58)"/><path d="M46,57v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="80" cy="46" rx="7" ry="4.8" transform="rotate(-22 80 46)"/><path d="M86,45v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="120" cy="58" rx="7" ry="4.8" transform="rotate(-22 120 58)"/><path d="M126,57v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="160" cy="64" rx="7" ry="4.8" transform="rotate(-22 160 64)"/><path d="M166,63v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="200" cy="52" rx="7" ry="4.8" transform="rotate(-22 200 52)"/><path d="M206,51v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="240" cy="40" rx="7" ry="4.8" transform="rotate(-22 240 40)"/><path d="M246,39v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="280" cy="58" rx="7" ry="4.8" transform="rotate(-22 280 58)"/><path d="M286,57v-29" fill="none"/></g></g><g transform="translate(712)"><g class="new-home-note "><ellipse cx="0" cy="70" rx="7" ry="4.8" transform="rotate(-22 0 70)"/><path d="M6,69v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="40" cy="58" rx="7" ry="4.8" transform="rotate(-22 40 58)"/><path d="M46,57v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="80" cy="46" rx="7" ry="4.8" transform="rotate(-22 80 46)"/><path d="M86,45v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="120" cy="58" rx="7" ry="4.8" transform="rotate(-22 120 58)"/><path d="M126,57v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="160" cy="64" rx="7" ry="4.8" transform="rotate(-22 160 64)"/><path d="M166,63v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="200" cy="52" rx="7" ry="4.8" transform="rotate(-22 200 52)"/><path d="M206,51v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="240" cy="40" rx="7" ry="4.8" transform="rotate(-22 240 40)"/><path d="M246,39v-29" fill="none"/></g><g class="new-home-note "><ellipse cx="280" cy="58" rx="7" ry="4.8" transform="rotate(-22 280 58)"/><path d="M286,57v-29" fill="none"/></g></g></g></g><rect x="124" y="16" width="27" height="80" rx="13" fill="#c59bf813"/><path stroke="#a879ef" stroke-width="2" d="M137 17v77"/><circle cx="137" cy="16" r="3" fill="#a879ef"/><text class="new-home-score-tag" x="274" y="107" fill="#8e7da2" font-size="9" font-family="system-ui" letter-spacing="2">À VOTRE TEMPO</text></svg>
+              <span class="new-home-card-title" id="newHomePartitionTitle" data-home-i="partitionTitle">Partition défilante</span>
+              <span class="new-home-card-copy" id="newHomePartitionCopy" data-home-i="partitionCopy">Donnez vie à vos morceaux. Importez un fichier MIDI et suivez les notes au fil de la partition.</span>
+              <span class="new-home-tags"><span data-home-i="partitionTagOne">Fichiers MIDI</span><span data-home-i="partitionTagTwo">Tempo ajustable</span></span>
+              <span class="new-home-card-action"><span data-home-i="partitionAction">Ouvrir une partition</span><span class="new-home-arrow" aria-hidden="true">↗</span></span>
+            </button>
+          </div>
+          </div>
+          <div class="new-home-bottom"><div class="new-home-piano" aria-hidden="true"><i style="--key-delay:0s"></i><i style="--key-delay:0.92s"></i><i style="--key-delay:0.46s"></i><i style="--key-delay:1.38s"></i><i style="--key-delay:2.76s"></i><i style="--key-delay:1.84s"></i><i style="--key-delay:2.3s"></i><i style="--key-delay:3.68s"></i><i style="--key-delay:3.22s"></i><i style="--key-delay:4.14s"></i><i style="--key-delay:5.52s"></i><i style="--key-delay:4.6s"></i><i style="--key-delay:5.06s"></i><i style="--key-delay:5.98s"></i></div><p><strong data-home-i="bottomStrong">Un petit moment pour jouer. Un grand pas pour progresser.</strong><br><span data-home-i="bottomCopy">Sur écran ou avec votre clavier MIDI.</span></p></div>
+          <footer class="new-home-footer"><span data-home-i="footerLeft">L’atelier des notes · Le plaisir d’apprendre</span><span data-home-i="footerRight">Écouter. Lire. Jouer.</span></footer>
         </div>
       </div>
 
+      <div id="appWorkspace" hidden>
       <div id="exerciseControlsWrap">
       <div class="controls" id="exerciseControls">
-        <div class="field">
+        <div class="field exercise-field">
           <label data-i="clef">Clé</label>
           <div class="seg" id="clefSeg">
             <button type="button" data-clef="treble" class="on" data-i="treble">Sol</button>
             <button type="button" data-clef="bass" data-i="bass">Fa</button>
           </div>
         </div>
-        <div class="field">
+        <div class="field" hidden>
           <label data-i="languageNotation">Langue et noms des notes</label>
           <div class="seg" id="langSeg">
             <button type="button" data-lang="fr" class="on">Français</button>
             <button type="button" data-lang="en">English (US)</button>
           </div>
         </div>
-        <div class="field">
+        <div class="field exercise-field">
           <label data-i="difficulty">Difficulté</label>
           <select id="difficulty">
             <option value="3" data-i="lower">Partie inférieure</option>
@@ -1825,6 +2393,9 @@ body.home-open { padding:0; background:#f8f6f2; }
             <option value="2" data-i="hard">Difficile (2 octaves)</option>
             <option value="custom" data-i="customDifficulty">Personnalisé (notes choisies)</option>
           </select>
+        </div>
+        <div class="field exercise-field">
+          <label data-i="accidentals">Altérations</label>
           <select id="exerciseAccidentals" aria-label="Altérations dans les séries">
             <option value="none" data-i="exerciseNaturals">Sans altération</option>
             <option value="sharp" data-i="exerciseSharps">Ajouter des dièses ♯</option>
@@ -1832,7 +2403,7 @@ body.home-open { padding:0; background:#f8f6f2; }
             <option value="both" data-i="exerciseSharpsFlats">Ajouter ♯ et ♭</option>
           </select>
         </div>
-        <div class="field">
+        <div class="field exercise-field">
           <label data-i="answerMode">Réponse</label>
           <div class="seg" id="answerModeSeg">
             <button type="button" data-answer-mode="keyboard" class="on" data-i="keyboardMode">Clavier</button>
@@ -1850,19 +2421,22 @@ body.home-open { padding:0; background:#f8f6f2; }
 
       <div id="partitionControlsWrap" hidden>
         <div class="partition-panel">
-          <div class="partition-row partition-row-wrap partition-row-balanced">
+          <div class="partition-row partition-row-wrap partition-row-balanced partition-primary-row">
             <div class="partition-field">
-              <label for="midiFileInput" class="btn-sm primary" style="cursor:pointer;" title="Charger un fichier .mid ou .midi">
-                <span class="partition-icon">📁</span> <span data-i="loadMidi">Charger MIDI</span>
+              <label for="midiFileInput" class="btn-sm primary" style="cursor:pointer;" title="Sélectionner ensemble le MIDI et son MP4">
+                <span class="folder-open-icon" aria-hidden="true"><svg viewBox="0 0 32 26"><path class="folder-back" d="M2 5a3 3 0 0 1 3-3h7l3.5 3.5H27a3 3 0 0 1 3 3v9H2V5Z"/><path class="folder-front" d="M5.2 9h23.6a2.5 2.5 0 0 1 2.4 3.1l-3 10.5a2.5 2.5 0 0 1-2.4 1.9H3.2a2.5 2.5 0 0 1-2.4-3.2L4 10.8A1.3 1.3 0 0 1 5.2 9Z"/></svg></span> <span data-i="loadMidi">Charger MIDI</span>
               </label>
-              <input type="file" id="midiFileInput" accept=".mid,.midi" hidden>
+              <input type="file" id="midiFileInput" accept=".mid,.midi,.mp4,video/mp4" multiple hidden>
+              <select id="folderMidiSelect" class="partition-select" aria-label="Morceaux du dossier sélectionné" hidden>
+                <option value="">Choisir un morceau du dossier</option>
+              </select>
               <select id="recentMidiSelect" class="partition-select" aria-label="Cinq derniers morceaux MIDI">
                 <option value="" data-i="noRecentMidi">Aucun morceau récent</option>
               </select>
               <select id="partitionTrackSelect" class="partition-select" style="display:none;"></select>
             </div>
 
-            <div class="partition-field">
+            <div class="partition-field" hidden>
               <label data-i="staves">Portées</label>
               <div class="seg" id="partitionClefSeg">
                 <button type="button" data-clef="grand" class="on" data-i="grandStaff">Sol/Fa</button>
@@ -1871,7 +2445,7 @@ body.home-open { padding:0; background:#f8f6f2; }
               </div>
             </div>
 
-            <div class="partition-field">
+            <div class="partition-field" hidden>
               <label data-i="accidentals">Altérations</label>
               <div class="seg" id="accidentalPrefSeg">
                 <button type="button" data-acc="auto" class="on" title="Automatique selon la tonalité">Auto</button>
@@ -1882,26 +2456,29 @@ body.home-open { padding:0; background:#f8f6f2; }
 
           </div>
 
-          <div class="partition-row partition-row-wrap partition-row-balanced">
+          <div class="partition-row partition-row-wrap partition-row-balanced partition-playback-row">
             <div class="partition-field">
               <button type="button" class="btn-sm icon-only" id="partitionPlayBtn" title="Lecture" aria-label="Lecture"><span class="partition-icon" id="partitionPlayIcon">▶</span><span class="visually-hidden" id="partitionPlayLabel">Lecture</span></button>
+              <span class="midi-status" id="midiStatus" title="MIDI non connecté"><span id="midiLabel">MIDI</span></span>
+              <button type="button" class="btn-sm icon-only live-midi-sound-btn partition-midi-sound-btn" id="partitionMidiSoundBtn" aria-pressed="true"><span aria-hidden="true">♬</span></button>
+              <div class="midi-devices" id="midiDevices"></div>
               <button type="button" class="btn-sm icon-only" id="partitionRewindBtn" title="Revenir au début" aria-label="Revenir au début"><span class="partition-icon">⏮</span></button>
               <button type="button" class="btn-sm icon-only" id="partitionLoopBtn" title="Lecture en boucle" aria-label="Lecture en boucle"><span class="partition-icon" id="partitionLoopIcon">↻</span></button>
-              <button type="button" class="btn-sm icon-only" id="partitionSoundBtn" title="Son activé" aria-label="Son activé"><span class="partition-icon" id="partitionSoundIcon">🔊</span></button>
+              <button type="button" class="btn-sm audio-source-btn" id="partitionSoundBtn" title="Son du fichier MIDI" aria-label="Son du fichier MIDI"><span class="speaker-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></span><span id="partitionSoundIcon">MIDI</span></button>
               <button type="button" class="btn-sm icon-only" id="partitionMetronomeBtn" title="Métronome désactivé" aria-label="Métronome désactivé"><span class="metronome-icon" id="partitionMetronomeIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 20h10l-2-14H9L7 20Z"/><path d="M6 20h12"/><path class="metronome-arm" d="M12 16 9 5"/><circle cx="9" cy="5" r="1" fill="currentColor" stroke="none"/></svg></span></button>
               <button type="button" class="btn-sm icon-only" id="partitionFullscreenBtn" title="Afficher en plein écran" aria-label="Afficher en plein écran"><span class="fullscreen-icon" aria-hidden="true"><svg class="fullscreen-enter" viewBox="0 0 24 24"><path d="M9 3H3v6M15 3h6v6M3 15v6h6M21 15v6h-6"/></svg><svg class="fullscreen-exit" viewBox="0 0 24 24"><path d="M9 3v6H3M15 3v6h6M3 15h6v6M21 15h-6v6"/></svg></span></button>
+              <button type="button" class="btn-sm icon-only" id="partitionVideoToggleBtn" title="Afficher la vidéo" aria-label="Afficher la vidéo" hidden><span class="partition-icon" id="partitionVideoToggleIcon">◉</span></button>
             </div>
 
             <div class="partition-field">
               <label data-i="tempo">Tempo</label>
               <div class="tempo-slider-wrap">
-                <input type="range" id="partitionTempoInput" min="10" max="240" value="100" step="1">
+                <input type="range" id="partitionTempoInput" min="1" max="240" value="100" step="1">
                 <span class="tempo-val" id="partitionTempoVal">100 BPM</span>
               </div>
             </div>
 
             <div class="partition-field">
-              <label data-i="mode">Mode</label>
               <div class="seg" id="partitionModeSeg">
                 <button type="button" data-scroll-mode="continuous" class="on" title="Défilement continu au tempo réglé" data-i="continuous">Continu</button>
                 <button type="button" data-scroll-mode="wait" title="Le défilement reprend seulement après la bonne touche au Casio" data-i="challenge">Attendre</button>
@@ -1909,7 +2486,7 @@ body.home-open { padding:0; background:#f8f6f2; }
             </div>
           </div>
 
-          <div class="partition-row">
+          <div class="partition-row partition-loop-row">
             <div class="partition-field">
               <label data-i="loop">Boucle</label>
               <span class="loop-range-label" data-i="fromMeasure">de la mesure</span>
@@ -1920,6 +2497,7 @@ body.home-open { padding:0; background:#f8f6f2; }
               <input class="loop-delay-input" id="partitionLoopDelayInput" type="number" min="0" max="30" value="3" step="0.5" inputmode="decimal" aria-label="Pause entre deux boucles en secondes">
               <span class="loop-range-label">s</span>
               <span class="partition-info-badge" id="partitionLoopInfo">Mesures 1 à 1</span>
+              <span class="loop-hover-help" data-i="selectPartitionPart">Sélectionner une partie de la partition</span>
             </div>
           </div>
 
@@ -1931,6 +2509,15 @@ body.home-open { padding:0; background:#f8f6f2; }
         </div>
       </div><!-- /#partitionControlsWrap -->
 
+      <div class="partition-video-wrap" id="partitionVideoWrap" hidden>
+        <button type="button" class="btn-sm icon-only partition-video-back" id="partitionVideoBackBtn" title="Masquer la vidéo" aria-label="Masquer la vidéo">↩</button>
+        <div class="partition-video-layout-tools">
+          <div class="compact-clef-picker" id="partitionCompactClef" role="group" aria-label="Clé de la partition réduite" hidden><button type="button" data-compact-clef="treble">𝄞 Sol</button><button type="button" data-compact-clef="bass">𝄢 Fa</button><button type="button" data-compact-clef="grand">Sol + Fa</button></div>
+          <button type="button" class="btn-sm icon-only partition-video-expand" id="partitionVideoExpandBtn" title="Agrandir la vidéo" aria-label="Agrandir la vidéo" aria-pressed="false">↗</button>
+        </div>
+        <video class="partition-video" id="partitionVideo" playsinline muted preload="metadata"></video>
+      </div>
+
       <div class="stage">
         <svg id="staff" viewBox="0 0 1000 210" role="img" aria-label="portée"></svg>
       </div>
@@ -1939,6 +2526,7 @@ body.home-open { padding:0; background:#f8f6f2; }
         <p class="question" id="question" hidden></p>
         <div class="score batch" id="score"></div>
         <div class="exercise-status-actions">
+          <button type="button" class="btn-sm live-midi-sound-btn" id="exerciseMidiSoundBtn" aria-pressed="true"><span aria-hidden="true">♬</span><span class="live-midi-sound-label"></span></button>
           <div class="batch" id="batchStatus"></div>
           <button type="button" class="btn-sm icon-only" id="exerciseFullscreenBtn" title="Afficher en plein écran" aria-label="Afficher en plein écran"><span class="fullscreen-icon" aria-hidden="true"><svg class="fullscreen-enter" viewBox="0 0 24 24"><path d="M9 3H3v6M15 3h6v6M3 15v6h6M21 15v6h-6"/></svg><svg class="fullscreen-exit" viewBox="0 0 24 24"><path d="M9 3v6H3M15 3v6h6M3 15h6v6M21 15h-6v6"/></svg></span></button>
         </div>
@@ -1955,18 +2543,19 @@ body.home-open { padding:0; background:#f8f6f2; }
       <div class="voice-panel" id="voicePanel" hidden>
         <div class="voice-panel-group voice-panel-group-left">
           <div class="voice-activity inactive" id="voiceActivity" role="status" aria-live="polite">Micro désactivé</div>
+          <button class="btn" id="voiceTrainerOpen" type="button">Apprentissage</button>
         </div>
         <div class="voice-panel-group voice-panel-group-right">
           <label class="voice-profile-local" for="voiceProfileQuickSelect" id="voiceProfileLabel">Profil local</label>
           <select class="voice-profile-select" id="voiceProfileQuickSelect" aria-labelledby="voiceProfileLabel"></select>
         </div>
-        <button class="btn" id="voiceTrainerOpen" type="button">Apprentissage</button>
         <div class="sr-only" aria-live="polite">
           <span id="voiceStatus">Micro inactif</span>
           <span id="voiceState"><span id="voiceDot"></span><span id="voiceLevelBar"></span></span>
           <span id="voiceHeard"></span>
         </div>
       </div>
+      </div><!-- /#appWorkspace -->
 
       <dialog class="voice-trainer" id="voiceTrainer">
         <div class="trainer-head">
@@ -2328,7 +2917,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
 
 </script>
 <!-- END GENERATED LIBADLMIDI -->
-<script src="https://cdn.jsdelivr.net/npm/meyda@5.5.1/dist/web/meyda.min.js"></script>
+<script src="meyda.min.js"></script>
 <script>
 (function () {
   "use strict";
@@ -2460,9 +3049,11 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       grandStaff: "Sol/Fa",
       system: "Nom des notes",
       languageNotation: "Langue et noms des notes",
-      exerciseMode: "📝 Séries (10 notes)",
-      partitionMode: "🎼 Partition défilante (MIDI)",
-      loadMidi: "Charger MIDI",
+      menuPrompt: "Choisissez votre activité",
+      backToMenu: "Retour au menu",
+      exerciseMode: "Séries (10 notes)",
+      partitionMode: "Partition défilante (MIDI)",
+      loadMidi: "Charger MIDI + MP4",
       noRecentMidi: "Aucun morceau récent",
       noPiece: "Aucun morceau",
       staves: "Portées",
@@ -2490,11 +3081,20 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       measureBeat: "Mesure {measure} · Temps {beat}",
       soundOn: "Son activé",
       soundOff: "Son désactivé",
+      midiAudioSource: "Son du fichier MIDI",
+      videoAudioSource: "Son de la vidéo",
+      videoAudioUnavailable: "Chargez une vidéo pour choisir sa piste sonore",
+      selectPartitionPart: "Sélectionner une partie de la partition",
       metronomeOn: "Métronome activé",
       metronomeOff: "Métronome désactivé",
       enterFullscreen: "Afficher en plein écran",
       exitFullscreen: "Quitter le plein écran",
-      loadMidiTitle: "Charger un fichier .mid ou .midi",
+      loadMidiTitle: "Sélectionner ensemble le MIDI et son MP4 de même nom",
+      folderMidiPrompt: "Choisir un morceau parmi les fichiers sélectionnés",
+      folderMidiLabel: "Morceaux MIDI sélectionnés",
+      folderMidiFound: "Sélection chargée : {count} morceaux MIDI. Choisissez un morceau.",
+      hideVideo: "Masquer la vidéo",
+      showVideo: "Afficher la vidéo",
       recentMidiLabel: "Cinq derniers morceaux MIDI",
       automaticAccidentals: "Automatique selon la tonalité",
       sharpAccidentals: "Toujours afficher des dièses ♯",
@@ -2648,9 +3248,11 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       grandStaff: "Grand staff",
       system: "Note names",
       languageNotation: "Language & note names",
-      exerciseMode: "📝 Batches (10 notes)",
-      partitionMode: "🎼 Scrolling score (MIDI)",
-      loadMidi: "Load MIDI",
+      menuPrompt: "Choose an activity",
+      backToMenu: "Back to menu",
+      exerciseMode: "Batches (10 notes)",
+      partitionMode: "Scrolling score (MIDI)",
+      loadMidi: "Load MIDI + MP4",
       noRecentMidi: "No recent pieces",
       noPiece: "No piece loaded",
       staves: "Staves",
@@ -2678,11 +3280,20 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       measureBeat: "Measure {measure} · Beat {beat}",
       soundOn: "Sound on",
       soundOff: "Sound off",
+      midiAudioSource: "MIDI file sound",
+      videoAudioSource: "Video sound",
+      videoAudioUnavailable: "Load a video to select its audio track",
+      selectPartitionPart: "Select a section of the score",
       metronomeOn: "Metronome on",
       metronomeOff: "Metronome off",
       enterFullscreen: "Enter full screen",
       exitFullscreen: "Exit full screen",
-      loadMidiTitle: "Load a .mid or .midi file",
+      loadMidiTitle: "Select the MIDI and its matching MP4 together",
+      folderMidiPrompt: "Choose a piece from the selected files",
+      folderMidiLabel: "Selected MIDI pieces",
+      folderMidiFound: "Selection loaded: {count} MIDI pieces. Choose a piece.",
+      hideVideo: "Hide video",
+      showVideo: "Show video",
       recentMidiLabel: "Five most recent MIDI pieces",
       automaticAccidentals: "Automatic, based on the key signature",
       sharpAccidentals: "Always display sharps ♯",
@@ -2859,7 +3470,6 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     voiceAudioSource: null,
     voiceMeydaAnalyzer: null,
     voiceVad: null,
-    voiceSensitivity: 1.0,
     voiceAcousticActive: false,
     voiceShouldListen: false,
     voiceStarting: false,
@@ -2926,12 +3536,9 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   const customNotesLabelEl = document.getElementById("customNotesLabel");
   const customNoteOptionsEl = document.getElementById("customNoteOptions");
   const midiStatusEl = document.getElementById("midiStatus");
-  const midiDotEl = document.getElementById("midiDot");
   const midiLabelEl = document.getElementById("midiLabel");
   const midiDevicesEl = document.getElementById("midiDevices");
   const midiWarningEl = document.getElementById("midiWarning");
-  const midiWarningTextEl = document.getElementById("midiWarningText");
-  const midiRetryBtn = document.getElementById("midiRetryBtn");
   const NS = "http://www.w3.org/2000/svg";
 
   function el(tag, attrs) {
@@ -3023,6 +3630,18 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
 
   function updatePartitionAccessibleLabels() {
     midiFileInput.previousElementSibling.title = t("loadMidiTitle");
+    homeMenuBtn.title = t("backToMenu");
+    homeMenuBtn.setAttribute("aria-label", t("backToMenu"));
+    partitionLangSeg.querySelectorAll("button").forEach(button => {
+      button.title = t("languageNotation");
+    });
+    folderMidiSelect.setAttribute("aria-label", t("folderMidiLabel"));
+    if (folderMidiSelect.options.length && !folderMidiSelect.options[0].value) {
+      folderMidiSelect.options[0].textContent = t("folderMidiPrompt");
+    }
+    partitionVideoBackBtn.title = t("hideVideo");
+    partitionVideoBackBtn.setAttribute("aria-label", t("hideVideo"));
+    updatePartitionVideoToggleUI();
     recentMidiSelect.setAttribute("aria-label", t("recentMidiLabel"));
     accidentalPrefSeg.querySelector('[data-acc="auto"]').title = t("automaticAccidentals");
     accidentalPrefSeg.querySelector('[data-acc="sharp"]').title = t("sharpAccidentals");
@@ -3048,129 +3667,74 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   function updatePartitionToggleIcons() {
     const p = state.partition;
     partitionLoopIcon.textContent = p.isLooping ? "🔁" : "↻";
-    partitionSoundIcon.textContent = p.soundEnabled ? "🔊" : "🔇";
-    partitionSoundBtn.title = p.soundEnabled ? t("soundOn") : t("soundOff");
-    partitionSoundBtn.setAttribute("aria-label", partitionSoundBtn.title);
+    updatePartitionAudioSourceUI();
     partitionMetronomeBtn.classList.toggle("is-on", p.metronomeEnabled);
     partitionMetronomeIcon.setAttribute("aria-hidden", "true");
     partitionMetronomeBtn.title = p.metronomeEnabled ? t("metronomeOn") : t("metronomeOff");
     partitionMetronomeBtn.setAttribute("aria-label", partitionMetronomeBtn.title);
   }
 
+  function updatePartitionAudioSourceUI() {
+    const p = state.partition;
+    const useVideoSound = p.videoActive && p.audioSource === "video";
+    p.soundEnabled = !useVideoSound;
+    partitionVideo.muted = !useVideoSound;
+    partitionSoundIcon.textContent = useVideoSound ? "VIDÉO" : "MIDI";
+    partitionSoundBtn.classList.toggle("video-source", useVideoSound);
+    partitionSoundBtn.disabled = !p.videoActive;
+    partitionSoundBtn.title = p.videoActive
+      ? (useVideoSound ? t("videoAudioSource") : t("midiAudioSource"))
+      : t("videoAudioUnavailable");
+    partitionSoundBtn.setAttribute("aria-label", partitionSoundBtn.title);
+  }
+
+  function updatePartitionVideoToggleUI() {
+    const p = state.partition;
+    partitionVideoToggleBtn.hidden = !p.videoActive;
+    const label = p.videoVisible ? t("hideVideo") : t("showVideo");
+    partitionVideoToggleBtn.title = label;
+    partitionVideoToggleBtn.setAttribute("aria-label", label);
+    partitionVideoToggleIcon.textContent = p.videoVisible ? "◉" : "◌";
+    updatePartitionVideoExpandUI();
+  }
+
   // ==================== MIDI ====================
 
-  function isAppleMobileDevice() {
-    const ua = navigator.userAgent || "";
-    const platform = navigator.platform || "";
-    const touchMac = platform === "MacIntel" && navigator.maxTouchPoints > 1;
-    return /iPad|iPhone|iPod/i.test(ua) || touchMac;
-  }
-
-  function showMidiWarning(message, showRetry = false) {
-    if (!midiWarningEl) return;
-    if (midiWarningTextEl) midiWarningTextEl.innerHTML = message;
-    midiWarningEl.style.display = "block";
-    if (midiRetryBtn) midiRetryBtn.style.display = showRetry ? "inline-block" : "none";
-  }
-
-  function hideMidiWarning() {
-    if (midiWarningEl) midiWarningEl.style.display = "none";
-    if (midiRetryBtn) midiRetryBtn.style.display = "none";
-  }
-
   function initMidi() {
-    const appleMobile = isAppleMobileDevice();
-
     if (!navigator.requestMIDIAccess) {
-      state.midiAccess = null;
-      disconnectMidiInput();
-      midiStatusEl.style.display = "none";
-
-      if (appleMobile) {
-        showMidiWarning(
-          "<b>MIDI non disponible dans Safari sur iPad/iPhone.</b><br>" +
-          "Pour utiliser votre piano MIDI, ouvrez cette même page dans <b>Web MIDI Browser</b>. " +
-          "Le microphone et les autres fonctions restent utilisables dans Safari."
-        );
-      } else {
-        showMidiWarning(
-          "<b>Web MIDI n'est pas disponible dans ce navigateur.</b><br>" +
-          "Utilisez un navigateur compatible Web MIDI pour connecter votre piano."
-        );
-      }
+      if (midiWarningEl) midiWarningEl.style.display = "block";
+      midiStatusEl.className = "midi-status";
+      midiStatusEl.title = t("midiNoDevice");
       return;
     }
-
-    hideMidiWarning();
-    midiStatusEl.style.display = "flex";
     refreshMidi();
   }
 
   async function refreshMidi() {
-    if (!navigator.requestMIDIAccess) {
-      initMidi();
-      return;
-    }
-
     try {
       state.midiAccess = await navigator.requestMIDIAccess({ sysex: false });
-      hideMidiWarning();
-      midiStatusEl.style.display = "flex";
-
       state.midiAccess.onstatechange = () => {
-        setTimeout(() => renderMidiDevices(), 100);
+        setTimeout(refreshMidi, 200);
       };
       renderMidiDevices();
     } catch (err) {
-      state.midiAccess = null;
-      disconnectMidiInput();
-      midiLabelEl.textContent = t("midiNoDevice");
-      midiDotEl.className = "midi-dot";
+      midiLabelEl.textContent = "MIDI";
+      midiStatusEl.className = "midi-status";
+      midiStatusEl.title = t("midiNoDevice");
       midiDevicesEl.innerHTML = "";
-
-      const appleMobile = isAppleMobileDevice();
-      if (appleMobile) {
-        showMidiWarning(
-          "<b>Accès MIDI refusé ou indisponible.</b><br>" +
-          "Sur iPad/iPhone, ouvrez cette page dans <b>Web MIDI Browser</b> puis autorisez l'accès au piano MIDI.",
-          true
-        );
-      } else {
-        // Sur PC, l'absence de clavier MIDI est un état normal :
-        // aucun message, aucun bouton Réessayer, aucun voyant rouge.
-        hideMidiWarning();
-        midiStatusEl.style.display = "none";
-      }
     }
-  }
-
-  if (midiRetryBtn) {
-    midiRetryBtn.addEventListener("click", () => {
-      hideMidiWarning();
-      midiStatusEl.style.display = navigator.requestMIDIAccess ? "flex" : "none";
-      refreshMidi();
-    });
   }
 
   function renderMidiDevices() {
     if (!state.midiAccess) return;
     midiDevicesEl.innerHTML = "";
-    const inputs = Array.from(state.midiAccess.inputs.values()).filter((input) => {
-      const name = String(input && input.name || "").trim().toLowerCase();
-      return name !== "session 1";
-    });
+    const inputs = Array.from(state.midiAccess.inputs.values());
     const hasAny = inputs.length > 0;
 
-    if (!hasAny && !isAppleMobileDevice()) {
-      midiDevicesEl.innerHTML = "";
-      midiStatusEl.style.display = "none";
-      hideMidiWarning();
-      return;
-    }
-
     if (!hasAny) {
-      midiLabelEl.textContent = t("midiNoDevice");
-      midiDotEl.className = "midi-dot";
+      midiLabelEl.textContent = "MIDI";
+      midiStatusEl.className = "midi-status";
+      midiStatusEl.title = t("midiNoDevice");
       return;
     }
 
@@ -3214,36 +3778,35 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   }
 
   function updateMidiDot() {
+    midiLabelEl.textContent = "MIDI";
     if (state.midiInput) {
-      midiLabelEl.textContent = state.midiInput.name || t("midiConnected");
-      midiDotEl.className = "midi-dot connected";
+      midiStatusEl.className = "midi-status connected";
+      midiStatusEl.title = state.midiInput.name || t("midiConnected");
     } else {
-      midiLabelEl.textContent = t("midiConnect");
-      midiDotEl.className = "midi-dot";
+      midiStatusEl.className = "midi-status";
+      midiStatusEl.title = t("midiConnect");
     }
   }
 
   function onMidiMessage(event) {
-    if (document.body.classList.contains("home-open")) return;
     const [status, note, velocity] = event.data;
     const command = status & 0xf0;
 
     if (command === 0x90 && velocity > 0) {
       state.midiNotesOn.add(note);
       markMidiKey(note, true);
-      playMidi(note);
-      midiDotEl.classList.remove("active");
-      void midiDotEl.offsetWidth;
-      midiDotEl.classList.add("active");
+      if (state.liveMidiSoundEnabled !== false) {
+        playMidi(note, .8, { velocity, group: "live-midi" });
+      }
+      midiStatusEl.classList.remove("active");
+      void midiStatusEl.offsetWidth;
+      midiStatusEl.classList.add("active");
 
       if (state.appMode === "partition") {
         handlePartitionInput(note);
       } else if (state.answerMode === "keyboard" && !state.locked && !isBatchComplete()) {
         const currentNote = state.batch[state.index];
-        if (currentNote) {
-          // Toute touche du Casio constitue une réponse :
-          // correcte si elle correspond, fausse sinon.
-          // Une mauvaise note est donc comptée puis on passe à la suivante.
+        if (currentNote && currentNote.midi === note) {
           submitAnswer({ type: "keyboard", midi: note });
         }
       }
@@ -3707,10 +4270,8 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
 
   function resetVoiceVad() {
     state.voiceVad = {
-      noiseFloor: 0.001,
+      noiseFloor: 0.006,
       calibrationFrames: 0,
-      calibrationValues: [],
-      calibrationDone: false,
       speaking: false,
       hotFrames: 0,
       quietFrames: 0,
@@ -3742,14 +4303,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     vad.preRoll = [];
     vad.cooldownUntil = performance.now() + 260;
 
-    const sensitivityPercent = 100 / Math.max(state.voiceSensitivity || 1.0, 0.0001);
-    const minDuration =
-      sensitivityPercent <= 15 ? 0.34 :
-      sensitivityPercent <= 30 ? 0.28 :
-      sensitivityPercent <= 60 ? 0.20 :
-      sensitivityPercent <= 100 ? 0.14 : 0.10;
-
-    if (!vector || duration < minDuration) {
+    if (!vector || duration < 0.08) {
       notifyAcousticTooShort();
       return;
     }
@@ -3764,78 +4318,23 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
 
     const vad = state.voiceVad;
     const now = performance.now();
-
-    // Calibration du silence au démarrage : ~1 seconde de mesures.
-    // On utilise un percentile élevé plutôt qu'une simple moyenne pour
-    // tenir compte du bruit réel de la pièce sans être trompé par un pic isolé.
-    if (!vad.calibrationDone) {
-      vad.calibrationValues.push(frame.rms);
+    if (vad.calibrationFrames < 12) {
+      vad.noiseFloor = vad.noiseFloor * 0.72 + frame.rms * 0.28;
       vad.calibrationFrames++;
-
-      if (vad.calibrationFrames < 90) {
-        return;
-      }
-
-      const sorted = vad.calibrationValues.slice().sort((a, b) => a - b);
-      const index = Math.min(sorted.length - 1, Math.floor(sorted.length * 0.85));
-      vad.noiseFloor = Math.max(0.00015, sorted[index] || 0.00015);
-      vad.calibrationDone = true;
-      vad.calibrationValues = [];
-      vad.cooldownUntil = now + 200;
       return;
     }
 
-    // Le curseur règle maintenant la marge AU-DESSUS du bruit ambiant.
-    // 100 % = marge normale ; 10 % = très stricte ; 200 % = très sensible.
-    const sensitivityPercent = 100 / Math.max(state.voiceSensitivity || 1.0, 0.0001);
-
-    const ratio =
-      sensitivityPercent <= 15 ? 6.0 :
-      sensitivityPercent <= 30 ? 4.5 :
-      sensitivityPercent <= 60 ? 3.2 :
-      sensitivityPercent <= 100 ? 2.4 :
-      sensitivityPercent <= 150 ? 1.9 : 1.6;
-
-    const absoluteMargin =
-      sensitivityPercent <= 15 ? 0.020 :
-      sensitivityPercent <= 30 ? 0.012 :
-      sensitivityPercent <= 60 ? 0.007 :
-      sensitivityPercent <= 100 ? 0.004 :
-      sensitivityPercent <= 150 ? 0.0025 : 0.0015;
-
-    const threshold = Math.max(
-      vad.noiseFloor * ratio,
-      vad.noiseFloor + absoluteMargin
-    );
-
+    const threshold = Math.max(0.008, vad.noiseFloor * 2.8);
     const hasVoice = frame.rms >= threshold;
 
     if (!vad.speaking) {
-      if (!hasVoice) {
-        // Le bruit de fond peut monter lentement (ventilateur, pièce, etc.).
-        // On le suit sans faire baisser trop vite le seuil vers le silence.
-        if (frame.rms > vad.noiseFloor) {
-          vad.noiseFloor = vad.noiseFloor * 0.94 + frame.rms * 0.06;
-        } else {
-          vad.noiseFloor = vad.noiseFloor * 0.997 + frame.rms * 0.003;
-        }
-      }
+      if (!hasVoice) vad.noiseFloor = vad.noiseFloor * 0.985 + frame.rms * 0.015;
       vad.preRoll.push(frame);
       if (vad.preRoll.length > 4) vad.preRoll.shift();
       if (now < vad.cooldownUntil) return;
 
       vad.hotFrames = hasVoice ? vad.hotFrames + 1 : 0;
-
-      // Plus la sensibilité est basse, plus on exige de trames consécutives
-      // avant de considérer qu'une vraie parole a commencé.
-      const sensitivityPercent = 100 / Math.max(state.voiceSensitivity || 1.0, 0.0001);
-      const requiredHotFrames =
-        sensitivityPercent <= 15 ? 8 :
-        sensitivityPercent <= 30 ? 6 :
-        sensitivityPercent <= 60 ? 4 :
-        sensitivityPercent <= 100 ? 3 : 2;
-
-      if (vad.hotFrames >= requiredHotFrames) {
+      if (vad.hotFrames >= 2) {
         vad.speaking = true;
         vad.frames = vad.preRoll.slice();
         vad.quietFrames = 0;
@@ -3882,29 +4381,11 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
 
   async function startVoiceAcousticAnalyzer() {
     if (!canUseAcousticAnalysis() || !state.voiceStream) return false;
+    stopVoiceAcousticAnalyzer();
 
-    // Arrête un éventuel analyseur précédent sans fermer l'AudioContext
-    // déjà déverrouillé par le geste utilisateur (important sur iPadOS).
-    state.voiceAcousticActive = false;
-    if (state.voiceMeydaAnalyzer) {
-      try { state.voiceMeydaAnalyzer.stop(); } catch (error) {}
-    }
-    if (state.voiceAudioSource) {
-      try { state.voiceAudioSource.disconnect(); } catch (error) {}
-    }
-    state.voiceMeydaAnalyzer = null;
-    state.voiceAudioSource = null;
-    state.voiceVad = null;
-
-    const context = await unlockVoiceAudioContext();
-    if (!context) return false;
-
-    if (!state.voiceStream || !state.voiceStream.active ||
-        !state.voiceStream.getAudioTracks ||
-        !state.voiceStream.getAudioTracks().some(track => track && track.readyState === "live")) {
-      throw new Error("Flux microphone audio actif introuvable avant l’initialisation de Meyda.");
-    }
-
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    const context = new AudioContextCtor();
+    await context.resume();
     const source = context.createMediaStreamSource(state.voiceStream);
     const analyzer = window.Meyda.createMeydaAnalyzer({
       audioContext: context,
@@ -4083,44 +4564,23 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   }
 
   async function keepVoiceStreamOpen() {
-    // Reuse only a genuinely active audio stream.
-    if (state.voiceStream && state.voiceStream.active) {
-        const activeAudioTracks = state.voiceStream.getAudioTracks
-            ? state.voiceStream.getAudioTracks().filter(track => track && track.readyState === 'live')
-            : [];
-        if (activeAudioTracks.length > 0) return state.voiceStream;
-    }
+    if (state.voiceStream && state.voiceStream.active) return;
+    if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function") return;
 
-    // The previous stream may exist but no longer be usable.
-    if (state.voiceStream && typeof state.voiceStream.getTracks === 'function') {
-        try {
-            state.voiceStream.getTracks().forEach(track => track.stop());
-        } catch (_) {}
-    }
-    state.voiceStream = null;
-
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const audioTracks = stream && typeof stream.getAudioTracks === 'function'
-            ? stream.getAudioTracks().filter(track => track && track.readyState === 'live')
-            : [];
-
-        if (!stream || !stream.active || audioTracks.length === 0) {
-            try {
-                if (stream && typeof stream.getTracks === 'function') {
-                    stream.getTracks().forEach(track => track.stop());
-                }
-            } catch (_) {}
-            throw new Error('Le navigateur n’a pas fourni de flux microphone audio actif.');
-        }
-
-        state.voiceStream = stream;
-        return stream;
-    } catch (error) {
-        setVoiceMediaError(error);
-        throw error;
-    }
-}
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    state.voiceStream = stream;
+    stream.getAudioTracks().forEach((track) => {
+      track.addEventListener("ended", () => {
+        if (state.voiceStream !== stream) return;
+        state.voiceStream = null;
+        stopVoiceAcousticAnalyzer();
+        if (!state.voiceShouldListen) return;
+        state.voiceShouldListen = false;
+        setVoiceStatus("voiceNoMic", true);
+        updateVoiceButton();
+      }, { once: true });
+    });
+  }
 
   function setVoiceMediaError(error) {
     const name = error && error.name ? error.name : "";
@@ -4203,28 +4663,6 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     }
   }
 
-
-  async function unlockVoiceAudioContext() {
-    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextCtor) return null;
-
-    let context = state.voiceAudioContext;
-    if (!context || context.state === "closed") {
-      context = new AudioContextCtor();
-      state.voiceAudioContext = context;
-    }
-
-    if (context.state === "suspended") {
-      try {
-        await context.resume();
-      } catch (error) {
-        setVoiceTechnicalError(error);
-        throw error;
-      }
-    }
-    return context;
-  }
-
   async function requestVoiceStart() {
     if (state.voiceShouldListen) return true;
     if (state.voiceStarting) return false;
@@ -4248,23 +4686,11 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       return false;
     }
 
-    if (!window.isSecureContext) {
-      setVoiceStatus("voiceIpadSecurePage", true);
-      updateVoiceButton();
-      return false;
-    }
-
     state.voiceStarting = true;
     setVoiceStatus("voiceStarting", false);
     updateVoiceButton();
 
     try {
-      // Important sur iPhone/iPad : déverrouiller Web Audio pendant
-      // l'action utilisateur, avant l'attente asynchrone de getUserMedia().
-      if (useAcoustic) {
-        await unlockVoiceAudioContext();
-      }
-
       await keepVoiceStreamOpen();
       if (!state.voiceStarting || state.answerMode !== "voice") {
         stopVoiceStream();
@@ -4441,15 +4867,6 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     );
     const totalRequired = VOICE_SAMPLE_COUNT * training.targetNoteIndices.length;
     trainerNoteEl.textContent = noteName;
-    trainerNoteEl.classList.remove("warning-13", "warning-14", "warning-15");
-    if (currentSamples.length >= 15) {
-      trainerNoteEl.classList.add("warning-15");
-    } else if (currentSamples.length >= 14) {
-      trainerNoteEl.classList.add("warning-14");
-    } else if (currentSamples.length >= 13) {
-      trainerNoteEl.classList.add("warning-13");
-    }
-
     trainerPromptEl.textContent = t("voiceTrainingPrompt")
       .replace("{note}", noteName);
     trainerProgressEl.max = totalRequired;
@@ -4652,34 +5069,20 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
         return;
       }
 
-      // La 15e écoute reste brièvement affichée en rouge vif pour prévenir
-      // que l'on va passer à la note suivante.
+      training.targetPosition++;
+      training.noteIndex = training.targetNoteIndices[training.targetPosition];
       training.accepting = false;
-      renderVoiceTraining();
-
+      training.lastDuration = 0;
+      training.transition = t("voiceTrainingNext")
+        .replace("{note}", NAMES[state.lang][training.noteIndex]);
       window.clearTimeout(training.transitionTimer);
       training.transitionTimer = window.setTimeout(() => {
         if (state.voiceTraining !== training) return;
-
-        training.targetPosition++;
-        training.noteIndex = training.targetNoteIndices[training.targetPosition];
-        training.lastDuration = 0;
-        training.transition = t("voiceTrainingNext")
-          .replace("{note}", NAMES[state.lang][training.noteIndex]);
+        training.accepting = true;
+        training.transition = "";
         renderVoiceTraining();
-
-        window.clearTimeout(training.transitionTimer);
-        training.transitionTimer = window.setTimeout(() => {
-          if (state.voiceTraining !== training) return;
-          training.accepting = true;
-          training.transition = "";
-          renderVoiceTraining();
-        }, 850);
-      }, 380);
-
-      return;
+      }, 850);
     }
-
     renderVoiceTraining();
   }
 
@@ -5038,7 +5441,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   const PARTITION_LOOP_DELAY_SECONDS = 3;
   const PARTITION_STAFF_LINE_WIDTH = 1.1;
 
-  state.appMode = "exercise"; // "exercise" | "partition"
+  state.appMode = "home"; // "home" | "exercise" | "partition"
   state.partition = {
     fileName: "",
     rawNotes: [],
@@ -5062,6 +5465,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     loopRestartTimer: null,
     waitingLoopRestart: false,
     soundEnabled: true,
+    audioSource: "midi",
     metronomeEnabled: false,
     audioClock: null,
     playbackKeys: new Set(),
@@ -5071,11 +5475,20 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     lastTimestamp: null,
     tracks: [],
     selectedTrack: "all",
-    recentMidiFiles: []
+    recentMidiFiles: [],
+    folderMidiPairs: [],
+    videoFileName: "",
+    videoUrl: "",
+    videoActive: false,
+    videoVisible: false,
+    videoWaiting: false
   };
 
   // DOM Elements for partition mode
   const appModeSeg = document.getElementById("appModeSeg");
+  const appHome = document.getElementById("appHome");
+  const appWorkspace = document.getElementById("appWorkspace");
+  const homeMenuBtn = document.getElementById("homeMenuBtn");
   const modeExerciseBtn = document.getElementById("modeExerciseBtn");
   const modePartitionBtn = document.getElementById("modePartitionBtn");
   const partitionLanguageWrap = document.getElementById("partitionLanguageWrap");
@@ -5083,6 +5496,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   const exerciseControlsWrap = document.getElementById("exerciseControlsWrap");
   const partitionControlsWrap = document.getElementById("partitionControlsWrap");
   const midiFileInput = document.getElementById("midiFileInput");
+  const folderMidiSelect = document.getElementById("folderMidiSelect");
   const recentMidiSelect = document.getElementById("recentMidiSelect");
   const partitionTrackSelect = document.getElementById("partitionTrackSelect");
   const accidentalPrefSeg = document.getElementById("accidentalPrefSeg");
@@ -5109,6 +5523,11 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   const partitionTimelineInput = document.getElementById("partitionTimelineInput");
   const partitionTimelineLabel = document.getElementById("partitionTimelineLabel");
   const partitionPieceInfo = document.getElementById("partitionPieceInfo");
+  const partitionVideoWrap = document.getElementById("partitionVideoWrap");
+  const partitionVideo = document.getElementById("partitionVideo");
+  const partitionVideoBackBtn = document.getElementById("partitionVideoBackBtn");
+  const partitionVideoToggleBtn = document.getElementById("partitionVideoToggleBtn");
+  const partitionVideoToggleIcon = document.getElementById("partitionVideoToggleIcon");
 
   // Built-in Demo Pieces
   const DEMO_PIECES = {
@@ -5954,6 +6373,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
 
   // Rendu complet de la partition défilante
   function renderPartitionStaff() {
+    if (state.partition.videoExpanded) { renderCompactPartitionStaff(); return; }
     clearSvg();
     const p = state.partition;
     const layout = getPartitionLayout();
@@ -6020,6 +6440,128 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       drawStemAndFlags(nx, y, note.pos, note.rhythm, color);
       drawPartitionNoteName(note, nx, y, color);
     });
+  }
+
+  function mediaBaseName(fileName) {
+    return String(fileName || "")
+      .replace(/\.[^.]+$/, "")
+      .trim()
+      .toLocaleLowerCase();
+  }
+
+  function isMidiFile(file) {
+    return Boolean(file && /\.(mid|midi)$/i.test(file.name));
+  }
+
+  function isMp4File(file) {
+    return Boolean(file && (/\.mp4$/i.test(file.name) || file.type === "video/mp4"));
+  }
+
+  function fileRelativeDirectory(file) {
+    const relativePath = String(file && file.webkitRelativePath || "").replace(/\\/g, "/");
+    const slashIndex = relativePath.lastIndexOf("/");
+    return slashIndex >= 0 ? relativePath.slice(0, slashIndex).toLocaleLowerCase() : "";
+  }
+
+  function findMatchingVideoFile(midiFile, files) {
+    if (!midiFile) return null;
+    const midiName = mediaBaseName(midiFile.name);
+    const matches = Array.from(files || []).filter(file => isMp4File(file)
+      && mediaBaseName(file.name) === midiName);
+    if (!matches.length) return null;
+    const midiDirectory = fileRelativeDirectory(midiFile);
+    return matches.find(file => fileRelativeDirectory(file) === midiDirectory) || matches[0];
+  }
+
+  function partitionVideoTimeForBeat(beat) {
+    const baseBpm = Math.max(1, Number(state.partition.baseBpm) || 100);
+    return Math.max(0, Number(beat) || 0) * 60 / baseBpm;
+  }
+
+  function syncPartitionVideo(forceSeek = false) {
+    const p = state.partition;
+    if (!p.videoActive || !partitionVideo.src) return;
+
+    const targetTime = partitionVideoTimeForBeat(p.currentBeat);
+    const duration = Number.isFinite(partitionVideo.duration) ? partitionVideo.duration : Infinity;
+    const safeTime = Math.max(0, Math.min(targetTime, duration));
+    if (forceSeek || !Number.isFinite(partitionVideo.currentTime)
+        || Math.abs(partitionVideo.currentTime - safeTime) > 0.16) {
+      try { partitionVideo.currentTime = safeTime; } catch (error) {}
+    }
+
+    const playbackRate = Math.max(0.1, Math.min(16,
+      (Number(p.bpm) || 100) / Math.max(1, Number(p.baseBpm) || 100)));
+    try { partitionVideo.playbackRate = playbackRate; } catch (error) {}
+
+    const shouldPlay = p.isPlaying && !p.waitingLoopRestart && !p.videoWaiting;
+    if (shouldPlay && partitionVideo.paused) {
+      partitionVideo.play().catch(() => {});
+    } else if (!shouldPlay && !partitionVideo.paused) {
+      partitionVideo.pause();
+    }
+  }
+
+  function deactivatePartitionVideo() {
+    const p = state.partition;
+    if (p.videoExpanded) setPartitionVideoExpanded(false);
+    partitionVideo.pause();
+    partitionVideo.removeAttribute("src");
+    partitionVideo.load();
+    if (p.videoUrl) URL.revokeObjectURL(p.videoUrl);
+    p.videoFileName = "";
+    p.videoUrl = "";
+    p.videoActive = false;
+    p.videoVisible = false;
+    p.videoWaiting = false;
+    p.audioSource = "midi";
+    p.soundEnabled = true;
+    partitionVideoWrap.hidden = true;
+    document.body.classList.remove("partition-video-mode");
+    updatePartitionVideoToggleUI();
+    updatePartitionAudioSourceUI();
+  }
+
+  function setPartitionVideoVisible(visible) {
+    const p = state.partition;
+    const nextVisible = Boolean(visible && p.videoActive);
+    if (!nextVisible && p.videoExpanded) setPartitionVideoExpanded(false);
+    p.videoVisible = nextVisible;
+    updatePartitionVideoVisibility();
+    updatePartitionVideoToggleUI();
+    if (p.videoVisible) {
+      requestAnimationFrame(fitPartitionVideoFully);
+      syncPartitionVideo(true);
+    }
+  }
+
+  function updatePartitionVideoVisibility() {
+    const visible = state.appMode === "partition"
+      && state.partition.videoActive
+      && state.partition.videoVisible;
+    partitionVideoWrap.hidden = !visible;
+    document.body.classList.toggle("partition-video-mode", visible);
+    document.body.classList.toggle("partition-video-expanded", visible && Boolean(state.partition.videoExpanded));
+    if (!visible) partitionVideo.pause();
+    updatePartitionVideoToggleUI();
+  }
+
+  function activatePartitionVideo(file) {
+    deactivatePartitionVideo();
+    if (!file) return;
+    const p = state.partition;
+    p.videoFileName = file.name;
+    p.videoUrl = URL.createObjectURL(file);
+    p.videoActive = true;
+    p.videoVisible = true;
+    p.videoExpanded = false;
+    p.audioSource = "midi";
+    p.soundEnabled = true;
+    partitionVideo.src = p.videoUrl;
+    updatePartitionVideoVisibility();
+    partitionVideo.load();
+    updatePartitionAudioSourceUI();
+    syncPartitionVideo(true);
   }
 
   function setLoadedMidi(parsed, name) {
@@ -6323,6 +6865,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     const p = state.partition;
     cancelPartitionLoopRestart();
     p.currentBeat = p.loopStartBeat;
+    p.videoWaiting = false;
     p.lastTimestamp = null;
     resetPartitionNotesFrom(p.loopStartBeat);
     resetPartitionSound();
@@ -6332,6 +6875,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     }
     updatePartitionTimelineUI();
     renderPartitionStaff();
+    syncPartitionVideo(true);
   }
 
   function schedulePartitionLoopRestart() {
@@ -6339,10 +6883,12 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     p.currentBeat = p.loopEndBeat;
     resetPartitionSound();
     p.waitingLoopRestart = true;
+    p.videoWaiting = true;
     p.animId = null;
     questionEl.textContent = t("loopRestart").replace("{seconds}", p.loopDelaySeconds);
     updatePartitionTimelineUI();
     renderPartitionStaff();
+    syncPartitionVideo(true);
 
     p.loopRestartTimer = window.setTimeout(() => {
       p.loopRestartTimer = null;
@@ -6383,6 +6929,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       restartPartitionLoop();
     }
     p.isPlaying = true;
+    p.videoWaiting = false;
     p.lastTimestamp = null;
     resetPartitionSound();
     if (p.scrollMode === "continuous") {
@@ -6395,6 +6942,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     }
     partitionPlayIcon.textContent = "⏸";
     setPartitionPlayButtonLabel("pause");
+    syncPartitionVideo(true);
     p.animId = requestAnimationFrame(partitionTick);
   }
 
@@ -6403,6 +6951,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     partitionAudioStartPending = false;
     const p = state.partition;
     p.isPlaying = false;
+    p.videoWaiting = false;
     resetPartitionSound();
     cancelPartitionLoopRestart();
     if (p.animId) {
@@ -6411,16 +6960,19 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     }
     partitionPlayIcon.textContent = "▶";
     setPartitionPlayButtonLabel("play");
+    syncPartitionVideo();
   }
 
   function rewindPartition() {
     const p = state.partition;
     cancelPartitionLoopRestart();
     p.currentBeat = p.isLooping ? p.loopStartBeat : 0;
+    p.videoWaiting = false;
     resetPartitionNotesFrom(p.currentBeat);
     resetPartitionSound();
     updatePartitionTimelineUI();
     renderPartitionStaff();
+    syncPartitionVideo(true);
     questionEl.textContent = t("partitionPrompt");
   }
 
@@ -6474,12 +7026,14 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       nextBeat = clock.beat + Math.max(0, getAudioCtx().currentTime - clock.time) * beatsPerSec;
     }
     const playbackEnd = p.isLooping ? p.loopEndBeat : p.totalBeats;
+    p.videoWaiting = false;
 
     // En mode défi, le repère est calé exactement sur le prochain temps à jouer.
     if (p.scrollMode === "wait") {
       const targetNote = getNextUnansweredNote();
       if (targetNote && nextBeat >= targetNote.beat - PARTITION_BEAT_EPSILON) {
         nextBeat = targetNote.beat;
+        p.videoWaiting = true;
         const waitingNotes = getWaitingNotesAtBeat(targetNote.beat);
         questionEl.textContent = waitingNotes.length > 1
           ? "Jouez l’accord : " + formatWaitingNotes(waitingNotes)
@@ -6488,6 +7042,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     }
 
     p.currentBeat = Math.min(nextBeat, playbackEnd);
+    syncPartitionVideo();
     checkPartitionMetronome(previousBeat, p.currentBeat);
 
     // Le mode défi ne joue pas la réponse avant l'utilisateur.
@@ -6674,7 +7229,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   }
 
   function appIsFullscreen() {
-    return document.documentElement.classList.contains("app-expanded");
+    return Boolean(document.fullscreenElement || document.webkitFullscreenElement);
   }
 
   function updatePartitionFullscreenButton() {
@@ -6687,10 +7242,15 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   }
 
   function enterAppFullscreen() {
-    if (appIsFullscreen()) return;
-    document.documentElement.classList.add("app-expanded");
-    window.scrollTo(0, 0);
-    updatePartitionFullscreenButton();
+    const root = document.documentElement;
+    const request = root.requestFullscreen || root.webkitRequestFullscreen;
+    if (!request || appIsFullscreen()) return;
+    try {
+      const result = request.call(root);
+      if (result && typeof result.catch === "function") result.catch(() => {});
+    } catch (error) {
+      // Certains navigateurs, notamment sur iPad, limitent le plein écran aux gestes directs.
+    }
   }
 
   function toggleAppFullscreen() {
@@ -6698,27 +7258,55 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       enterAppFullscreen();
       return;
     }
-    document.documentElement.classList.remove("app-expanded");
-    updatePartitionFullscreenButton();
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (!exit) return;
+    try {
+      const result = exit.call(document);
+      if (result && typeof result.catch === "function") result.catch(() => {});
+    } catch (error) {
+      // Le bouton reste disponible si le navigateur refuse de quitter ce mode.
+    }
+  }
+
+  function showAppHome() {
+    pausePartition();
+    if (state.partition.videoExpanded) setPartitionVideoExpanded(false);
+    if (state.voiceShouldListen) stopVoiceRecognition();
+    state.appMode = "home";
+    state.partition.videoVisible = false;
+    updatePartitionVideoVisibility();
+    appHome.hidden = false;
+    appWorkspace.hidden = true;
+    homeMenuBtn.hidden = true;
+    partitionLanguageWrap.hidden = true;
+    window.scrollTo(0, 0);
   }
 
   function setAppMode(mode) {
+    ensureMidiInitialized();
     state.appMode = mode;
+    appHome.hidden = true;
+    appWorkspace.hidden = false;
+    homeMenuBtn.hidden = false;
+    partitionLanguageWrap.hidden = false;
     modeExerciseBtn.classList.toggle("on", mode === "exercise");
     modePartitionBtn.classList.toggle("on", mode === "partition");
 
     if (mode === "exercise") {
       pausePartition();
+      if (state.partition.videoExpanded) setPartitionVideoExpanded(false);
+      state.partition.videoVisible = false;
+      updatePartitionVideoVisibility();
       svg.classList.remove("partition-selectable");
       svg.setAttribute("aria-label", t("staffLabel"));
       exerciseControlsWrap.hidden = false;
       partitionControlsWrap.hidden = true;
-      partitionLanguageWrap.hidden = true;
       svg.setAttribute("viewBox", "0 0 " + SVG_W + " " + SVG_H);
       updateAnswerModeUI();
       updateStatus();
       renderStaff();
     } else {
+      updatePartitionVideoVisibility();
       if (state.voiceShouldListen) stopVoiceRecognition();
       svg.classList.add("partition-selectable");
       svg.setAttribute("aria-label", t("partitionStaffLabel"));
@@ -6742,6 +7330,9 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   // Écouteurs d'événements Partition
   modeExerciseBtn.addEventListener("click", () => setAppMode("exercise"));
   modePartitionBtn.addEventListener("click", () => setAppMode("partition"));
+  homeMenuBtn.addEventListener("click", showAppHome);
+  document.addEventListener("fullscreenchange", updatePartitionFullscreenButton);
+  document.addEventListener("webkitfullscreenchange", updatePartitionFullscreenButton);
   partitionFullscreenBtn.addEventListener("click", toggleAppFullscreen);
   exerciseFullscreenBtn.addEventListener("click", toggleAppFullscreen);
   svg.addEventListener("pointerdown", beginPartitionLoopSelection);
@@ -6751,6 +7342,14 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
 
   partitionPlayBtn.addEventListener("click", togglePartitionPlay);
   partitionRewindBtn.addEventListener("click", rewindPartition);
+  partitionVideoBackBtn.addEventListener("click", () => setPartitionVideoVisible(false));
+  partitionVideoToggleBtn.addEventListener("click", () => {
+    setPartitionVideoVisible(!state.partition.videoVisible);
+  });
+  partitionVideo.addEventListener("loadedmetadata", () => {
+    fitPartitionVideoFully();
+    syncPartitionVideo(true);
+  });
 
   partitionLoopBtn.addEventListener("click", () => {
     const p = state.partition;
@@ -6769,9 +7368,12 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
 
   partitionSoundBtn.addEventListener("click", () => {
     const p = state.partition;
-    p.soundEnabled = !p.soundEnabled;
+    if (!p.videoActive) return;
+    p.audioSource = p.audioSource === "video" ? "midi" : "video";
+    p.soundEnabled = p.audioSource === "midi";
     resetPartitionSound();
     updatePartitionToggleIcons();
+    syncPartitionVideo(true);
   });
 
   partitionMetronomeBtn.addEventListener("click", () => {
@@ -6796,6 +7398,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     partitionTempoInput.value = bpm;
     partitionTempoVal.textContent = bpm + " BPM";
     batchStatusEl.textContent = bpm + " BPM";
+    syncPartitionVideo();
   }
 
   partitionTempoInput.addEventListener("input", () => {
@@ -6805,9 +7408,11 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   partitionModeSeg.querySelectorAll("button").forEach(btn => {
     btn.addEventListener("click", () => {
       state.partition.scrollMode = btn.dataset.scrollMode;
+      state.partition.videoWaiting = false;
       resetPartitionSound();
       state.partition.lastTimestamp = null;
       partitionModeSeg.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === btn));
+      syncPartitionVideo(true);
     });
   });
 
@@ -6864,11 +7469,15 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     });
     updatePartitionTimelineUI();
     renderPartitionStaff();
+    syncPartitionVideo(true);
   });
 
   recentMidiSelect.addEventListener("change", () => {
     const record = state.partition.recentMidiFiles.find(item => item.id === recentMidiSelect.value);
-    if (record) loadRecentMidiRecord(record);
+    if (record) {
+      deactivatePartitionVideo();
+      loadRecentMidiRecord(record);
+    }
   });
 
   partitionTrackSelect.addEventListener("change", () => {
@@ -7087,7 +7696,6 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       const arrayBuffer = midiRecordArrayBuffer(record);
       const parsed = parseMidi(arrayBuffer, record.fileName);
       setLoadedMidi(parsed, record.fileName);
-      if (!welcomeHasChosenMode) setAppMode("partition");
       await persistLastMidiFile(arrayBuffer, record.fileName);
       await refreshRecentMidiSelect(record.fileName);
       feedbackEl.className = "feedback good";
@@ -7116,7 +7724,6 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
       const arrayBuffer = midiRecordArrayBuffer(record);
       const parsed = parseMidi(arrayBuffer, record.fileName);
       setLoadedMidi(parsed, record.fileName);
-      setAppMode("partition");
       await persistLastMidiFile(arrayBuffer, record.fileName);
       await refreshRecentMidiSelect(record.fileName);
       feedbackEl.className = "feedback";
@@ -7128,13 +7735,15 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   }
 
   // Chargement de fichier MIDI
-  function handleMidiFile(file) {
+  function handleMidiFile(file, videoFile = null) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const parsed = parseMidi(e.target.result, file.name);
         setLoadedMidi(parsed, file.name);
+        if (videoFile) activatePartitionVideo(videoFile);
+        else deactivatePartitionVideo();
         persistLastMidiFile(e.target.result, file.name)
           .then(() => refreshRecentMidiSelect(file.name));
         feedbackEl.className = "feedback good";
@@ -7149,9 +7758,79 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     reader.readAsArrayBuffer(file);
   }
 
+  function folderMidiDisplayName(file) {
+    const relativePath = String(file.webkitRelativePath || "").replace(/\\/g, "/");
+    const pathParts = relativePath.split("/").filter(Boolean);
+    const displayPath = pathParts.length > 1 ? pathParts.slice(1).join("/") : file.name;
+    return displayPath.replace(/\.(mid|midi)$/i, "");
+  }
+
+  function showFolderMidiChoices(files) {
+    const allFiles = Array.from(files || []);
+    const midiFiles = allFiles
+      .filter(isMidiFile)
+      .sort((a, b) => folderMidiDisplayName(a).localeCompare(
+        folderMidiDisplayName(b), state.lang === "fr" ? "fr" : "en", { sensitivity: "base" }
+      ));
+
+    state.partition.folderMidiPairs = midiFiles.map((midiFile, index) => ({
+      id: String(index),
+      midiFile,
+      videoFile: findMatchingVideoFile(midiFile, allFiles)
+    }));
+
+    folderMidiSelect.innerHTML = "";
+    const promptOption = document.createElement("option");
+    promptOption.value = "";
+    promptOption.textContent = t("folderMidiPrompt");
+    folderMidiSelect.appendChild(promptOption);
+
+    state.partition.folderMidiPairs.forEach((pair) => {
+      const option = document.createElement("option");
+      option.value = pair.id;
+      option.textContent = folderMidiDisplayName(pair.midiFile);
+      folderMidiSelect.appendChild(option);
+    });
+
+    folderMidiSelect.hidden = midiFiles.length === 0;
+    if (midiFiles.length === 1) {
+      folderMidiSelect.value = "0";
+      handleMidiFile(
+        state.partition.folderMidiPairs[0].midiFile,
+        state.partition.folderMidiPairs[0].videoFile
+      );
+    } else if (midiFiles.length > 1) {
+      feedbackEl.className = "feedback good";
+      feedbackEl.textContent = t("folderMidiFound").replace("{count}", midiFiles.length);
+    }
+    return midiFiles.length;
+  }
+
+  function handleSelectedMidiFiles(files) {
+    const allFiles = Array.from(files || []);
+    const midiFiles = allFiles.filter(isMidiFile);
+    if (!midiFiles.length) return false;
+
+    const isFolderSelection = midiFiles.length > 1
+      || allFiles.some(file => Boolean(file.webkitRelativePath));
+    if (isFolderSelection) {
+      showFolderMidiChoices(allFiles);
+    } else {
+      const midiFile = midiFiles[0];
+      handleMidiFile(midiFile, findMatchingVideoFile(midiFile, allFiles));
+    }
+    return true;
+  }
+
   midiFileInput.addEventListener("change", (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) handleMidiFile(file);
+    const files = Array.from(e.target.files || []);
+    e.target.value = "";
+    handleSelectedMidiFiles(files);
+  });
+
+  folderMidiSelect.addEventListener("change", () => {
+    const pair = state.partition.folderMidiPairs.find(item => item.id === folderMidiSelect.value);
+    if (pair) handleMidiFile(pair.midiFile, pair.videoFile);
   });
 
   // Glisser-déposer de fichier MIDI
@@ -7166,10 +7845,10 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   cardEl.addEventListener("drop", (e) => {
     e.preventDefault();
     cardEl.classList.remove("dragover");
-    const file = e.dataTransfer.files && e.dataTransfer.files[0];
-    if (file) {
+    const files = Array.from(e.dataTransfer.files || []);
+    if (files.some(isMidiFile)) {
       if (state.appMode !== "partition") setAppMode("partition");
-      handleMidiFile(file);
+      handleSelectedMidiFiles(files);
     }
   });
 
@@ -7740,6 +8419,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
     });
     refreshAcousticModel();
     applyI18n();
+    updateNewHomeLanguage();
     buildKeyboard();
     buildNamePad();
     if (state.appMode === "partition") {
@@ -7824,7 +8504,7 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && !voiceTrainerEl.open && !document.body.classList.contains("home-open") && !event.target.closest("button, input, select, textarea")) {
+    if (event.key === "Enter" && !voiceTrainerEl.open) {
       newBatch();
     }
   });
@@ -7837,101 +8517,266 @@ globalThis.LectureAdlMidiFactory=createADLMIDI;
   });
 
 
-  // Navigation de l’accueil : les fonctions d’apprentissage restent inchangées.
-  let welcomeHasChosenMode = false;
-  let welcomeMidiInitialized = false;
-  const welcomePage = document.getElementById('welcomePage');
-  const learningApp = document.getElementById('learningApp');
-  const welcomeLangSeg = document.getElementById('welcomeLangSeg');
-  const welcomeCopy = {
+  const homeLangSeg = document.getElementById("homeLangSeg");
+  try { state.liveMidiSoundEnabled = localStorage.getItem("lecture-notes-live-midi-sound") !== "off"; } catch (error) { state.liveMidiSoundEnabled = true; }
+  const NEW_HOME_COPY = {
     fr: {
-      brand: "L’atelier des notes", eyebrow: "Un peu de pratique, beaucoup de musique",
-      title: "La musique commence<br><em>par une note.</em>",
-      intro: "Apprenez à lire, prenez le rythme et faites sonner vos progrès.<br>Choisissez votre façon de jouer.",
-      choiceLabel: "À vous de donner le tempo", exerciseCategory: "Les premiers accords",
-      exerciseTitle: "Série de notes", exerciseCopy: "Une note après l’autre, entraînez votre regard et vos réflexes avec des séries de 10 notes.",
-      exerciseTagOne: "10 notes par série", exerciseTagTwo: "À votre rythme", exerciseAction: "Commencer une série",
-      partitionCategory: "La musique en mouvement", partitionTitle: "Partition défilante",
-      partitionCopy: "Donnez vie à vos morceaux. Importez un fichier MIDI et suivez les notes au fil de la partition.",
-      partitionTagOne: "Fichiers MIDI", partitionTagTwo: "Tempo ajustable", partitionAction: "Ouvrir une partition",
-      bottomStrong: "Un petit moment pour jouer. Un grand pas pour progresser.", bottomCopy: "Sur écran ou avec votre clavier MIDI.",
-      footerLeft: "L’atelier des notes · Le plaisir d’apprendre", footerRight: "Écouter. Lire. Jouer.",
-      back: "Accueil", backLabel: "Revenir à l’accueil", languageLabel: "Langue", scoreTag: "À VOTRE TEMPO",
+      brand:"L’atelier des notes",eyebrow:"Un peu de pratique, beaucoup de musique",heroTitle:"La musique commence<br><em>par une note.</em>",intro:"Apprenez à lire, prenez le rythme et faites sonner vos progrès.<br>Choisissez votre façon de jouer.",choiceLabel:"À vous de donner le tempo",exerciseCategory:"Les premiers accords",exerciseTitle:"Série de notes",exerciseCopy:"Une note après l’autre, entraînez votre regard et vos réflexes avec des séries de 10 notes.",exerciseTagOne:"10 notes par série",exerciseTagTwo:"À votre rythme",exerciseAction:"Commencer une série",partitionCategory:"La musique en mouvement",partitionTitle:"Partition défilante",partitionCopy:"Donnez vie à vos morceaux. Importez un fichier MIDI et suivez les notes au fil de la partition.",partitionTagOne:"Fichiers MIDI",partitionTagTwo:"Tempo ajustable",partitionAction:"Ouvrir une partition",bottomStrong:"Un petit moment pour jouer. Un grand pas pour progresser.",bottomCopy:"Sur écran ou avec votre clavier MIDI.",footerLeft:"L’atelier des notes · Le plaisir d’apprendre",footerRight:"Écouter. Lire. Jouer.",language:"Langue",scoreTag:"À VOTRE TEMPO",themeToNight:"Activer le mode nuit",themeToDay:"Activer le mode jour"
     },
     en: {
-      brand: "The note studio", eyebrow: "A little practice, a lot of music",
-      title: "Music begins<br><em>with a note.</em>",
-      intro: "Learn to read, find the rhythm and make your progress sound.<br>Choose how you want to play.",
-      choiceLabel: "Your tempo, your choice", exerciseCategory: "First steps",
-      exerciseTitle: "Note series", exerciseCopy: "One note at a time, train your eyes and reflexes with sets of 10 notes.",
-      exerciseTagOne: "10 notes per set", exerciseTagTwo: "At your pace", exerciseAction: "Start a set",
-      partitionCategory: "Music in motion", partitionTitle: "Scrolling score",
-      partitionCopy: "Bring your pieces to life. Import a MIDI file and follow the notes as the score moves.",
-      partitionTagOne: "MIDI files", partitionTagTwo: "Adjustable tempo", partitionAction: "Open a score",
-      bottomStrong: "A little time to play. A big step forward.", bottomCopy: "On screen or with your MIDI keyboard.",
-      footerLeft: "The note studio · The joy of learning", footerRight: "Listen. Read. Play.",
-      back: "Home", backLabel: "Return to home", languageLabel: "Language", scoreTag: "AT YOUR TEMPO",
+      brand:"The note studio",eyebrow:"A little practice, a lot of music",heroTitle:"Music begins<br><em>with a note.</em>",intro:"Learn to read, find the rhythm and make your progress sound.<br>Choose how you want to play.",choiceLabel:"Your tempo, your choice",exerciseCategory:"First steps",exerciseTitle:"Note series",exerciseCopy:"One note at a time, train your eyes and reflexes with sets of 10 notes.",exerciseTagOne:"10 notes per set",exerciseTagTwo:"At your pace",exerciseAction:"Start a set",partitionCategory:"Music in motion",partitionTitle:"Scrolling score",partitionCopy:"Bring your pieces to life. Import a MIDI file and follow the notes as the score moves.",partitionTagOne:"MIDI files",partitionTagTwo:"Adjustable tempo",partitionAction:"Open a score",bottomStrong:"A little time to play. A big step forward.",bottomCopy:"On screen or with your MIDI keyboard.",footerLeft:"The note studio · The joy of learning",footerRight:"Listen. Read. Play.",language:"Language",scoreTag:"AT YOUR TEMPO",themeToNight:"Enable night mode",themeToDay:"Enable day mode"
     }
   };
-  function updateWelcomeLanguage() {
-    const language = state.lang === 'en' ? 'en' : 'fr';
-    const copy = welcomeCopy[language];
-    welcomePage.lang = language;
-    document.querySelectorAll('[data-welcome-i]').forEach(node => { node.textContent = copy[node.dataset.welcomeI]; });
-    welcomePage.querySelectorAll('[data-welcome-html]').forEach(node => { node.innerHTML = copy[node.dataset.welcomeHtml]; });
-    welcomePage.querySelectorAll('.welcome-note-name').forEach(node => { node.textContent = node.dataset[language === 'en' ? 'noteEn' : 'noteFr']; });
-    const scoreTag = welcomePage.querySelector('.welcome-score-tag');
+  function updateNewHomeLanguage() {
+    const language = state.lang === "en" ? "en" : "fr";
+    const copy = NEW_HOME_COPY[language];
+    document.querySelectorAll("[data-home-i]").forEach(node => { node.textContent = copy[node.dataset.homeI]; });
+    document.querySelectorAll("[data-home-html]").forEach(node => { node.innerHTML = copy[node.dataset.homeHtml]; });
+    document.querySelectorAll(".new-home-note-name").forEach(node => { node.textContent = node.dataset[language === "en" ? "noteEn" : "noteFr"]; });
+    const scoreTag = document.querySelector(".new-home-score-tag");
     if (scoreTag) scoreTag.textContent = copy.scoreTag;
-    document.getElementById('welcomeBack').setAttribute('aria-label', copy.backLabel);
-    welcomeLangSeg.setAttribute('aria-label', copy.languageLabel);
-    welcomeLangSeg.querySelectorAll('button').forEach(button => button.classList.toggle('on', button.dataset.lang === language));
+    homeLangSeg.setAttribute("aria-label", copy.language);
+    homeLangSeg.querySelectorAll("button").forEach(button => button.classList.toggle("on", button.dataset.lang === language));
+    updateThemeButtons();
+    updateLiveMidiSoundUI();
   }
-  function openLearningMode(mode) {
-    welcomeHasChosenMode = true;
-    welcomePage.hidden = true;
-    learningApp.hidden = false;
-    document.body.classList.remove('home-open');
-    setAppMode(mode);
-    if (mode === 'exercise' && isBatchComplete()) newBatch();
-    learningApp.classList.add('welcome-enter');
-    window.scrollTo(0, 0);
-    learningApp.querySelector('h1').focus({ preventScroll: true });
-    if (!welcomeMidiInitialized) { welcomeMidiInitialized = true; initMidi(); }
+  const homeThemeToggle = document.getElementById("homeThemeToggle");
+  const appThemeToggle = document.getElementById("appThemeToggle");
+  const liveMidiSoundButtons = [
+    document.getElementById("exerciseMidiSoundBtn"),
+    document.getElementById("partitionMidiSoundBtn")
+  ];
+  const LIVE_MIDI_SOUND_COPY = {
+    fr: { both:"Casio + iPad", casioOnly:"Casio seul", bothTitle:"Casio + iPad : les deux sons sont actifs. Cliquer pour couper le son de l’iPad.", casioOnlyTitle:"Casio seul : cliquer pour ajouter le son de l’iPad." },
+    en: { both:"Casio + iPad", casioOnly:"Casio only", bothTitle:"Casio + iPad: both sounds are active. Click to mute the iPad sound.", casioOnlyTitle:"Casio only: click to add the iPad sound." }
+  };
+  function currentTheme() {
+    return document.documentElement.dataset.theme === "night" ? "night" : "day";
   }
-  document.getElementById('welcomeExercise').addEventListener('click', () => openLearningMode('exercise'));
-  document.getElementById('welcomePartition').addEventListener('click', () => openLearningMode('partition'));
-  document.getElementById('welcomeBack').addEventListener('click', () => {
-    pausePartition();
-    clearAdvanceTimer();
-    if (state.locked) { state.locked = false; state.index++; }
-    clearAnswerMarks();
-    stopPianoVoices();
-    stopVoiceRecognition();
-    clearMidiKeyMarks();
-    state.midiNotesOn.clear();
-    document.documentElement.classList.remove('app-expanded');
-    updatePartitionFullscreenButton();
-    learningApp.hidden = true;
-    learningApp.classList.remove('welcome-enter');
-    updateWelcomeLanguage();
-    welcomePage.hidden = false;
-    document.body.classList.add('home-open');
-    window.scrollTo(0, 0);
-    document.getElementById(state.appMode === 'partition' ? 'welcomePartition' : 'welcomeExercise').focus({ preventScroll: true });
+  function updateThemeButtons() {
+    const copy = NEW_HOME_COPY[state.lang === "en" ? "en" : "fr"];
+    const night = currentTheme() === "night";
+    [homeThemeToggle, appThemeToggle].forEach(button => {
+      button.textContent = night ? "☀" : "☾";
+      button.title = night ? copy.themeToDay : copy.themeToNight;
+      button.setAttribute("aria-label", button.title);
+      button.setAttribute("aria-pressed", String(night));
+    });
+  }
+  function toggleTheme() {
+    const nextTheme = currentTheme() === "night" ? "day" : "night";
+    document.documentElement.dataset.theme = nextTheme;
+    try { localStorage.setItem("lecture-notes-theme", nextTheme); } catch (error) {}
+    updateThemeButtons();
+  }
+  function updateLiveMidiSoundUI() {
+    const copy = LIVE_MIDI_SOUND_COPY[state.lang === "en" ? "en" : "fr"];
+    const enabled = state.liveMidiSoundEnabled !== false;
+    liveMidiSoundButtons.forEach(button => {
+      const label = button.querySelector(".live-midi-sound-label");
+      if (label) label.textContent = enabled ? copy.both : copy.casioOnly;
+      button.classList.toggle("on", enabled);
+      button.title = enabled ? copy.bothTitle : copy.casioOnlyTitle;
+      button.setAttribute("aria-label", button.title);
+      button.setAttribute("aria-pressed", String(enabled));
+    });
+  }
+  function setLiveMidiSound(enabled) {
+    state.liveMidiSoundEnabled = Boolean(enabled);
+    if (!state.liveMidiSoundEnabled) stopPianoVoices("live-midi");
+    try { localStorage.setItem("lecture-notes-live-midi-sound", state.liveMidiSoundEnabled ? "on" : "off"); } catch (error) {}
+    updateLiveMidiSoundUI();
+  }
+  homeThemeToggle.addEventListener("click", toggleTheme);
+  appThemeToggle.addEventListener("click", toggleTheme);
+  liveMidiSoundButtons.forEach(button => button.addEventListener("click", () => setLiveMidiSound(state.liveMidiSoundEnabled === false)));
+  homeLangSeg.querySelectorAll("button").forEach(button => button.addEventListener("click", () => setNoteLanguage(button.dataset.lang)));
+
+  let delayedMidiInitialized = false;
+  function ensureMidiInitialized() {
+    if (delayedMidiInitialized) return;
+    delayedMidiInitialized = true;
+    initMidi();
+  }
+
+  const partitionVideoExpandBtn = document.getElementById("partitionVideoExpandBtn");
+  const partitionCompactClef = document.getElementById("partitionCompactClef");
+  const VIDEO_LAYOUT_COPY = {
+    fr: { expand:"Agrandir la vidéo", restore:"Revenir à l’affichage normal", clef:"Clé de la partition réduite" },
+    en: { expand:"Enlarge video", restore:"Return to normal view", clef:"Clef for the compact score" }
+  };
+  function rebuildPartitionForVideoClef(clef) {
+    const p = state.partition;
+    p.clef = clef === "bass" ? "bass" : clef === "treble" ? "treble" : "grand";
+    updatePartitionClefUI();
+    if (p.rawNotes.length > 0) {
+      p.notes = preparePartitionNotes(p.rawNotes, p.clef, p.accidentalPref, p.keySignature.sf);
+      resetPartitionSound();
+    }
+    renderPartitionStaff();
+  }
+  function updatePartitionVideoExpandUI() {
+    const p = state.partition;
+    const copy = VIDEO_LAYOUT_COPY[state.lang === "en" ? "en" : "fr"];
+    const expanded = Boolean(p.videoExpanded && p.videoVisible && p.videoActive);
+    partitionVideoExpandBtn.hidden = !p.videoActive;
+    partitionVideoExpandBtn.textContent = expanded ? "↙" : "↗";
+    partitionVideoExpandBtn.title = expanded ? copy.restore : copy.expand;
+    partitionVideoExpandBtn.setAttribute("aria-label", partitionVideoExpandBtn.title);
+    partitionVideoExpandBtn.setAttribute("aria-pressed", String(expanded));
+    partitionCompactClef.hidden = !expanded;
+    partitionCompactClef.setAttribute("aria-label", copy.clef);
+    partitionCompactClef.querySelectorAll("button").forEach(button => {
+      button.classList.toggle("on", button.dataset.compactClef === p.clef);
+    });
+  }
+  function setPartitionVideoExpanded(expanded) {
+    const p = state.partition;
+    const nextExpanded = Boolean(expanded && p.videoActive && p.videoVisible);
+    if (nextExpanded === Boolean(p.videoExpanded)) {
+      document.body.classList.toggle("partition-video-expanded", nextExpanded);
+      svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      updatePartitionVideoExpandUI();
+      return;
+    }
+    if (nextExpanded) {
+      p.videoPreviousClef = p.clef || "grand";
+      p.videoExpanded = true;
+      document.body.classList.add("partition-video-expanded");
+      svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      const compactClef = ["grand", "treble", "bass"].includes(p.clef) ? p.clef : (p.videoCompactClef || "grand");
+      rebuildPartitionForVideoClef(compactClef);
+    } else {
+      if (["grand", "treble", "bass"].includes(p.clef)) p.videoCompactClef = p.clef;
+      p.videoExpanded = false;
+      document.body.classList.remove("partition-video-expanded");
+      svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      rebuildPartitionForVideoClef(p.videoPreviousClef || "grand");
+    }
+    updatePartitionVideoExpandUI();
+    requestAnimationFrame(fitPartitionVideoFully);
+  }
+  function fitPartitionVideoFully() {
+    if (!state.partition.videoVisible || partitionVideoWrap.hidden) return;
+    const sourceWidth = Number(partitionVideo.videoWidth);
+    const sourceHeight = Number(partitionVideo.videoHeight);
+    const availableWidth = partitionVideoWrap.clientWidth;
+    const availableHeight = partitionVideoWrap.clientHeight;
+    if (!(sourceWidth > 0 && sourceHeight > 0 && availableWidth > 0 && availableHeight > 0)) return;
+    const scale = Math.min(availableWidth / sourceWidth, availableHeight / sourceHeight);
+    partitionVideo.style.width = Math.max(1, Math.floor(sourceWidth * scale)) + "px";
+    partitionVideo.style.height = Math.max(1, Math.floor(sourceHeight * scale)) + "px";
+  }
+  function renderCompactPartitionStaff() {
+    clearSvg();
+    const p = state.partition;
+    const compactHeight = 112;
+    const compactWidth = Math.max(420, Math.round(svg.getBoundingClientRect().width || svg.parentElement.clientWidth || SVG_W));
+    const isGrand = p.clef === "grand";
+    const compactLineGap = isGrand ? 7 : 12;
+    const compactStep = compactLineGap / 2;
+    const clefEndX = 64;
+    const targetX = Math.min(PARTITION_TARGET_X, compactWidth * .18);
+    const beatsPerMeasure = p.timeSignature.num || 4;
+    const curBeat = p.currentBeat;
+    const staffs = isGrand
+      ? [{ clef:"treble", bottomY:42 }, { clef:"bass", bottomY:100 }]
+      : [{ clef:p.clef === "bass" ? "bass" : "treble", bottomY:82 }];
+    const staffTop = Math.min(...staffs.map(staff => staff.bottomY - 4 * compactLineGap));
+    const staffBottom = Math.max(...staffs.map(staff => staff.bottomY));
+
+    svg.setAttribute("viewBox", "0 0 " + compactWidth + " " + compactHeight);
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    svg.appendChild(el("rect", { x:0, y:0, width:compactWidth, height:compactHeight, fill:"#f9fbfd" }));
+    staffs.forEach(staff => {
+      for (let index = 0; index < 5; index++) {
+        const y = staff.bottomY - index * compactLineGap;
+        svg.appendChild(el("line", { x1:clefEndX, y1:y, x2:compactWidth, y2:y, stroke:"var(--staff)", "stroke-width":1.15 }));
+      }
+      const clef = el("text", {
+        class:"compact-clef-symbol",
+        x:isGrand ? 12 : 8,
+        y:staff.clef === "bass" ? staff.bottomY + (isGrand ? 2 : 9) : staff.bottomY + (isGrand ? 5 : 11),
+        "font-family":"'Bravura','Noto Music','Segoe UI Symbol','Apple Symbols',serif",
+        "font-size":isGrand ? (staff.clef === "bass" ? 39 : 45) : (staff.clef === "bass" ? 55 : 64),
+        fill:"var(--staff)"
+      });
+      clef.textContent = CLEF_LABEL[staff.clef];
+      svg.appendChild(clef);
+    });
+    svg.appendChild(el("line", { x1:clefEndX, y1:staffTop, x2:clefEndX, y2:staffBottom, stroke:"var(--staff)", "stroke-width":1.5 }));
+    if (isGrand) svg.appendChild(el("line", { x1:7, y1:staffTop, x2:7, y2:staffBottom, stroke:"var(--staff)", "stroke-width":2 }));
+
+    const minVisibleBeat = Math.max(0, curBeat - targetX / PIXELS_PER_BEAT);
+    const maxVisibleBeat = curBeat + (compactWidth - targetX + 30) / PIXELS_PER_BEAT;
+    const startMeasure = Math.floor(minVisibleBeat / beatsPerMeasure);
+    const endMeasure = Math.ceil(maxVisibleBeat / beatsPerMeasure);
+    for (let measure = startMeasure; measure <= endMeasure; measure++) {
+      const x = targetX + (measure * beatsPerMeasure - curBeat) * PIXELS_PER_BEAT - PARTITION_BARLINE_OFFSET_X;
+      if (x > clefEndX && x < compactWidth) {
+        svg.appendChild(el("line", { x1:x, y1:staffTop, x2:x, y2:staffBottom, stroke:"var(--line)", "stroke-width":1.2 }));
+      }
+    }
+
+    p.notes.forEach(note => {
+      const x = targetX + (note.beat - curBeat) * PIXELS_PER_BEAT;
+      if (x < clefEndX + 5 || x > compactWidth + 15) return;
+      const noteStaff = staffs.find(staff => staff.clef === note.staffClef) || staffs[0];
+      const y = noteStaff.bottomY - note.pos * compactStep;
+      const isPast = x < targetX - 7;
+      const isNow = Math.abs(x - targetX) <= 10;
+      let color = isPast ? "var(--future)" : "var(--staff)";
+      if (note.hitGood) color = "var(--good)";
+      if (isNow) color = "var(--accent-strong)";
+      const noteRx = isGrand ? 5.5 : 7;
+      const noteRy = isGrand ? 3.8 : 5;
+      const stemLength = isGrand ? 18 : 28;
+      if (note.accidental) {
+        const accidental = el("text", { x:x-(isGrand ? 10 : 13), y:y+(isGrand ? 4 : 6), "font-size":isGrand ? 12 : 17, "font-family":"Georgia,serif", fill:color });
+        accidental.textContent = note.accidental > 0 || note.accidental === "#" ? "♯" : "♭";
+        svg.appendChild(accidental);
+      }
+      svg.appendChild(el("ellipse", { cx:x, cy:y, rx:noteRx, ry:noteRy, fill:color, stroke:color, "stroke-width":1, transform:"rotate(-18 " + x + " " + y + ")" }));
+      const stemUp = note.pos < 4;
+      svg.appendChild(el("line", {
+        x1:stemUp ? x+noteRx : x-noteRx,
+        y1:y,
+        x2:stemUp ? x+noteRx : x-noteRx,
+        y2:stemUp ? y-stemLength : y+stemLength,
+        stroke:color,
+        "stroke-width":isGrand ? 1.5 : 1.8,
+        "stroke-linecap":"round"
+      }));
+    });
+    svg.appendChild(el("line", { x1:targetX, y1:4, x2:targetX, y2:compactHeight-4, stroke:"var(--accent)", "stroke-width":2, "stroke-dasharray":"5,3" }));
+  }
+  partitionVideoExpandBtn.addEventListener("click", () => setPartitionVideoExpanded(!state.partition.videoExpanded));
+  partitionCompactClef.querySelectorAll("button").forEach(button => {
+    button.addEventListener("click", () => {
+      state.partition.videoCompactClef = button.dataset.compactClef;
+      rebuildPartitionForVideoClef(button.dataset.compactClef);
+      updatePartitionVideoExpandUI();
+    });
   });
-  welcomeLangSeg.querySelectorAll('button').forEach(button => button.addEventListener('click', () => { setNoteLanguage(button.dataset.lang); updateWelcomeLanguage(); }));
-  updateWelcomeLanguage();
+  window.addEventListener("resize", () => {
+    if (state.partition.videoExpanded) renderPartitionStaff();
+    fitPartitionVideoFully();
+  });
+  if (window.ResizeObserver) {
+    new ResizeObserver(fitPartitionVideoFully).observe(partitionVideoWrap);
+  }
 
   // ==================== INIT ====================
 
   loadVoiceProfiles();
   applyI18n();
+  updateNewHomeLanguage();
   buildKeyboard();
   buildNamePad();
   newBatch();
+  showAppHome();
   restoreLastMidiFile();
 })();
 </script>
-
 </body>
 </html>
